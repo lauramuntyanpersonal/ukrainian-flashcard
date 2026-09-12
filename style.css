@@ -69,19 +69,26 @@ input {
 }
 
 .tab-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   max-width: 980px;
   margin: 0 auto 18px;
-  padding: 0 16px;
+  padding: 10px 16px 0;
+  background: rgba(244, 247, 251, 0.9);
+  backdrop-filter: blur(8px);
 }
 
 .tab-button {
-  background: rgba(255, 255, 255, 0.6);
+  min-height: 46px;
+  background: rgba(255, 255, 255, 0.8);
   color: var(--muted);
   border: 1px solid var(--border);
   box-shadow: 0 6px 18px rgba(20, 33, 61, 0.04);
+  font-weight: 700;
 }
 
 .tab-button.active {
@@ -389,6 +396,35 @@ button.mini {
 }
 
 @media (max-width: 640px) {
+  .app-shell {
+    padding-top: 12px;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .topbar h1 {
+    font-size: 1.8rem;
+  }
+
+  .tab-bar {
+    gap: 8px;
+    padding-inline: 12px;
+  }
+
+  .tab-button {
+    min-height: 42px;
+    padding: 10px 8px;
+    font-size: 0.9rem;
+  }
+
+  .panel {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
   .study-actions,
   .study-footer {
     grid-template-columns: 1fr;

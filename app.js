@@ -479,15 +479,18 @@ refreshWordsButton.addEventListener('click', () => {
   showStatus('Word list refreshed.', 'success');
 });
 
-tabButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    const selectedTab = button.dataset.tab;
-    tabButtons.forEach((tab) => tab.classList.toggle('active', tab === button));
-    tabPanels.forEach((panel) => {
-      panel.classList.toggle('active', panel.dataset.panel === selectedTab);
-    });
+function setActiveTab(selectedTab) {
+  tabButtons.forEach((tab) => tab.classList.toggle('active', tab.dataset.tab === selectedTab));
+  tabPanels.forEach((panel) => {
+    panel.classList.toggle('active', panel.dataset.panel === selectedTab);
   });
+}
+
+tabButtons.forEach((button) => {
+  button.addEventListener('click', () => setActiveTab(button.dataset.tab));
 });
+
+setActiveTab('words');
 
 document.getElementById('flip-btn').addEventListener('click', flipCard);
 document.getElementById('next-btn').addEventListener('click', goNext);
