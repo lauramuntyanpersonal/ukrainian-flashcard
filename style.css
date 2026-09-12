@@ -145,6 +145,13 @@ button.mini {
   font-size: 0.9rem;
 }
 
+.helper-text {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
 .status {
   min-height: 24px;
   margin-top: 12px;

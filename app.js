@@ -313,7 +313,7 @@ async function handleUpload(event) {
     renderPendingUploadRows();
     const defaultName = setNameInput.value.trim() || file.name.replace(/\.[^.]+$/, '');
     setNameInput.value = defaultName;
-    showStatus(`Loaded ${cards.length} rows. Select the ones you want, then create the set.`, 'success');
+    showStatus(`Loaded ${cards.length} rows into your word bank. Pick the rows you want, then create the study set name at the end.`, 'success');
   } catch (error) {
     pendingUploadRows = [];
     renderPendingUploadRows();

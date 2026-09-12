@@ -28,19 +28,20 @@
         <section class="panel upload-panel">
           <h2>Upload a new word set</h2>
           <form id="upload-form">
+            <p class="helper-text">Upload your full CSV or JSON as a raw word bank. You can create a named study set later from the rows you choose.</p>
             <label>
-              Study set name
-              <input type="text" id="set-name" placeholder="Everyday Ukrainian" />
+              Study set name for later
+              <input type="text" id="set-name" placeholder="Optional for now — set it when you create the study set" />
             </label>
             <label>
-              Description
-              <input type="text" id="set-description" placeholder="Travel phrases and daily vocabulary" />
+              Description for later
+              <input type="text" id="set-description" placeholder="Optional — add it when you create the study set" />
             </label>
             <label class="file-picker">
               <span>Choose CSV or JSON</span>
               <input type="file" id="file-input" accept=".csv,.json" required />
             </label>
-            <button type="submit">Upload and review rows</button>
+            <button type="submit">Upload raw word bank</button>
           </form>
           <div id="upload-status" class="status" aria-live="polite"></div>
 
