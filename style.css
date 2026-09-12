@@ -96,6 +96,10 @@ input {
   backdrop-filter: blur(12px);
 }
 
+.tab-bar.hidden {
+  display: none;
+}
+
 .tab-button {
   min-height: 54px;
   background: #f3f6fb;
@@ -341,6 +345,10 @@ button.mini {
 
 .hidden {
   display: none !important;
+}
+
+#nav-back-button {
+  min-width: 72px;
 }
 
 .flashcard {

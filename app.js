@@ -42,9 +42,11 @@ const flashcard = document.getElementById('flashcard');
 const studyTitle = document.getElementById('study-title');
 const backButton = document.getElementById('back-button');
 const resetButton = document.getElementById('reset-button');
+const navBackButton = document.getElementById('nav-back-button');
 const tabButtons = document.querySelectorAll('.tab-button');
 const tabPanels = document.querySelectorAll('.tab-panel');
 const refreshWordsButton = document.getElementById('refresh-words-button');
+const tabBar = document.querySelector('.tab-bar');
 
 const frontText = document.getElementById('front-text');
 const backText = document.getElementById('back-text');
@@ -394,6 +396,12 @@ function openSet(setId) {
   currentCards = set.cards || [];
   app.classList.add('hidden');
   studyPanel.classList.remove('hidden');
+  if (tabBar) {
+    tabBar.classList.add('hidden');
+  }
+  if (navBackButton) {
+    navBackButton.classList.remove('hidden');
+  }
   studyTitle.textContent = set.name;
   renderCurrentCard();
 }
@@ -486,9 +494,33 @@ function setActiveTab(selectedTab) {
   });
 }
 
+function showHomeScreen() {
+  app.classList.remove('hidden');
+  studyPanel.classList.add('hidden');
+  if (tabBar) {
+    tabBar.classList.remove('hidden');
+  }
+  if (navBackButton) {
+    navBackButton.classList.add('hidden');
+  }
+  setActiveTab('words');
+}
+
 tabButtons.forEach((button) => {
-  button.addEventListener('click', () => setActiveTab(button.dataset.tab));
+  button.addEventListener('click', () => {
+    if (tabBar) {
+      tabBar.classList.remove('hidden');
+    }
+    if (navBackButton) {
+      navBackButton.classList.add('hidden');
+    }
+    setActiveTab(button.dataset.tab);
+  });
 });
+
+if (navBackButton) {
+  navBackButton.addEventListener('click', showHomeScreen);
+}
 
 setActiveTab('words');
 
