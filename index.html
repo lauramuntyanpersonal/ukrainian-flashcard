@@ -15,6 +15,18 @@
     <link rel="stylesheet" href="./style.css?v=20260912-6" />
   </head>
   <body>
+    <div id="username-modal" class="username-modal hidden" aria-live="polite">
+      <div class="username-card">
+        <p class="eyebrow">Welcome</p>
+        <h2>Choose your username</h2>
+        <p class="helper-text">This keeps your word bank and flashcard sets synced across your phone and computer.</p>
+        <div class="username-row stacked">
+          <input id="start-username-input" type="text" maxlength="24" placeholder="Enter your username" />
+          <button id="start-save-username-button" type="button">Continue</button>
+        </div>
+      </div>
+    </div>
+
     <div class="app-shell">
       <header class="topbar">
         <button id="nav-back-button" class="secondary mini hidden" type="button">← Back</button>
@@ -49,6 +61,16 @@
 
         <section class="panel upload-panel tab-panel" data-panel="upload">
           <h2>Upload a new word set</h2>
+          <div class="username-box">
+            <label for="username-input">
+              <span>Username</span>
+            </label>
+            <div class="username-row">
+              <input id="username-input" type="text" maxlength="24" placeholder="Enter your username" />
+              <button id="save-username-button" class="ghost mini" type="button">Save</button>
+            </div>
+            <p id="username-status" class="helper-text compact">Current user: default</p>
+          </div>
           <form id="upload-form">
             <p class="helper-text">Upload your full CSV or JSON as a raw word bank. You can choose the rows you want and make flashcards later.</p>
             <label class="file-picker">
@@ -110,6 +132,7 @@
 
     <div id="update-status" class="status" aria-live="polite"></div>
 
+    <script src="./config.js"></script>
     <script>
       const APP_VERSION = '20260912-6';
       const updateButton = document.getElementById('update-button');

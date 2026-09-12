@@ -214,6 +214,55 @@ button.mini {
   line-height: 1.5;
 }
 
+.helper-text.compact {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+}
+
+.username-box {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.username-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.username-row.stacked {
+  grid-template-columns: 1fr;
+}
+
+.username-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.52);
+  padding: 20px;
+}
+
+.username-modal.hidden {
+  display: none;
+}
+
+.username-card {
+  width: min(100%, 400px);
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 24px 18px;
+  box-shadow: 0 18px 45px rgba(20, 33, 61, 0.2);
+}
+
+.username-card h2 {
+  margin-bottom: 8px;
+}
+
 .status {
   min-height: 24px;
   margin-top: 12px;

@@ -1,0 +1,4 @@
+window.FLASHCARDS_CONFIG = {
+  supabaseUrl: 'https://biicvwwfhfgviynzjdbl.supabase.co',
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJpaWN2d3dmaGZndml5bnpqZGJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMzM1NTcsImV4cCI6MjEwNDgwOTU1N30.ZCLbtTwoddeObQGtNIVIc35digFeOTsdZhwpg4yXrYw',
+};

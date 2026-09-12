@@ -1,5 +1,6 @@
 const STORAGE_KEY = 'ukrainian-flashcards-sets-v1';
 const WORD_BANK_KEY = 'ukrainian-flashcards-word-bank-v1';
+const USERNAME_KEY = 'ukrainian-flashcards-username-v1';
 
 const demoSets = [
   {
@@ -51,6 +52,12 @@ const tabButtons = document.querySelectorAll('.tab-button');
 const tabPanels = document.querySelectorAll('.tab-panel');
 const refreshWordsButton = document.getElementById('refresh-words-button');
 const tabBar = document.querySelector('.tab-bar');
+const usernameInput = document.getElementById('username-input');
+const saveUsernameButton = document.getElementById('save-username-button');
+const usernameStatus = document.getElementById('username-status');
+const usernameModal = document.getElementById('username-modal');
+const startUsernameInput = document.getElementById('start-username-input');
+const startSaveUsernameButton = document.getElementById('start-save-username-button');
 
 const frontText = document.getElementById('front-text');
 const backText = document.getElementById('back-text');
@@ -69,11 +76,128 @@ function toId(value) {
   return `${value.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-` + Date.now().toString(36);
 }
 
+function getCurrentUsername() {
+  const stored = localStorage.getItem(USERNAME_KEY);
+  const username = String(stored || '').trim();
+  const safeUsername = username || 'default';
+  if (!username) {
+    localStorage.setItem(USERNAME_KEY, safeUsername);
+  }
+  return safeUsername;
+}
+
+function setCurrentUsername(username) {
+  const safeUsername = String(username || '').trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-_]/g, '');
+  const finalUsername = safeUsername || 'default';
+  localStorage.setItem(USERNAME_KEY, finalUsername);
+  return finalUsername;
+}
+
+function hasUsername() {
+  return Boolean(getCurrentUsername()) && getCurrentUsername() !== 'default';
+}
+
+function ensureUsernamePrompt() {
+  const username = getCurrentUsername();
+  const shouldShowPrompt = username === 'default';
+
+  if (usernameModal) {
+    usernameModal.classList.toggle('hidden', !shouldShowPrompt);
+  }
+
+  if (startUsernameInput && shouldShowPrompt) {
+    startUsernameInput.value = '';
+    startUsernameInput.focus();
+  }
+
+  if (usernameInput && !shouldShowPrompt) {
+    usernameInput.value = username;
+  }
+
+  return !shouldShowPrompt;
+}
+
+function getScopedKey(baseKey) {
+  return `${baseKey}:${getCurrentUsername()}`;
+}
+
+function getCloudConfig() {
+  const cfg = window.FLASHCARDS_CONFIG || {};
+  if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+    return null;
+  }
+  return cfg;
+}
+
+async function syncUserDataFromCloud() {
+  const cfg = getCloudConfig();
+  const username = getCurrentUsername();
+  if (!cfg || username === 'default') return null;
+
+  try {
+    const response = await fetch(`${cfg.supabaseUrl}/rest/v1/flashcards_users?username=eq.${encodeURIComponent(username)}&select=data`, {
+      headers: {
+        apikey: cfg.supabaseAnonKey,
+        Authorization: `Bearer ${cfg.supabaseAnonKey}`,
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) return null;
+    const rows = await response.json();
+    if (!rows || !rows.length) return null;
+
+    const data = rows[0]?.data || { words: [], sets: [] };
+    localStorage.setItem(getScopedKey(WORD_BANK_KEY), JSON.stringify(Array.isArray(data.words) ? data.words : []));
+    localStorage.setItem(getScopedKey(STORAGE_KEY), JSON.stringify(Array.isArray(data.sets) ? data.sets : []));
+    return data;
+  } catch (error) {
+    return null;
+  }
+}
+
+async function syncUserDataToCloud() {
+  const cfg = getCloudConfig();
+  const username = getCurrentUsername();
+  if (!cfg || username === 'default') return null;
+
+  try {
+    const payload = {
+      username,
+      data: {
+        words: readWordBank(),
+        sets: readSets(),
+      },
+    };
+
+    const response = await fetch(`${cfg.supabaseUrl}/rest/v1/flashcards_users?on_conflict=username`, {
+      method: 'POST',
+      headers: {
+        apikey: cfg.supabaseAnonKey,
+        Authorization: `Bearer ${cfg.supabaseAnonKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return payload.data;
+  } catch (error) {
+    return null;
+  }
+}
+
 function readSets() {
-  const raw = localStorage.getItem(STORAGE_KEY);
+  const key = getScopedKey(STORAGE_KEY);
+  const raw = localStorage.getItem(key);
   if (!raw) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(demoSets));
-    return demoSets;
+    const fallback = localStorage.getItem(STORAGE_KEY) || JSON.stringify(demoSets);
+    localStorage.setItem(key, fallback);
+    return JSON.parse(fallback);
   }
 
   try {
@@ -85,11 +209,15 @@ function readSets() {
 }
 
 function saveSets(sets) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sets));
+  localStorage.setItem(getScopedKey(STORAGE_KEY), JSON.stringify(sets));
+  if (getCloudConfig()) {
+    syncUserDataToCloud();
+  }
 }
 
 function readWordBank() {
-  const raw = localStorage.getItem(WORD_BANK_KEY);
+  const key = getScopedKey(WORD_BANK_KEY);
+  const raw = localStorage.getItem(key);
   if (!raw) return [];
 
   try {
@@ -101,7 +229,10 @@ function readWordBank() {
 }
 
 function saveWordBank(words) {
-  localStorage.setItem(WORD_BANK_KEY, JSON.stringify(words));
+  localStorage.setItem(getScopedKey(WORD_BANK_KEY), JSON.stringify(words));
+  if (getCloudConfig()) {
+    syncUserDataToCloud();
+  }
 }
 
 function mergeWordBank(items) {
@@ -170,51 +301,93 @@ function makeCard(raw, idx) {
   };
 }
 
-function parseCsv(text) {
-  const lines = text.split(/\r?\n/).filter(line => line.trim());
-  if (!lines.length) return [];
-
-  const rows = [];
-  let current = [];
+function countUnquotedDelimiters(line, delimiter) {
+  let count = 0;
   let inQuotes = false;
-  let field = '';
 
-  const pushField = () => {
-    current.push(field);
-    field = '';
-  };
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
 
-  for (const line of lines) {
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (char === '"') {
-        if (inQuotes && line[i + 1] === '"') {
-          field += '"';
-          i++;
-        } else {
-          inQuotes = !inQuotes;
-        }
-      } else if (char === ',' && !inQuotes) {
-        pushField();
-      } else if (char === '\n' && inQuotes) {
-        field += char;
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        i++;
       } else {
-        field += char;
+        inQuotes = !inQuotes;
       }
+      continue;
     }
-    pushField();
-    rows.push(current);
-    current = [];
+
+    if (char === delimiter && !inQuotes) {
+      count += 1;
+    }
   }
 
+  return count;
+}
+
+function parseCsv(text) {
+  const cleanedText = String(text || '').replace(/^\uFEFF/, '').trim();
+  if (!cleanedText) return [];
+
+  const candidates = [',', ';', '\t', '|'];
+  const firstLine = cleanedText.split(/\r?\n/).find((line) => line.trim()) || '';
+  const delimiter = candidates
+    .map((candidate) => ({ candidate, count: countUnquotedDelimiters(firstLine, candidate) }))
+    .sort((a, b) => b.count - a.count)[0]?.candidate || ',';
+
+  const rows = [];
+  let currentRow = [];
+  let currentField = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < cleanedText.length; i++) {
+    const char = cleanedText[i];
+
+    if (char === '"') {
+      if (inQuotes && cleanedText[i + 1] === '"') {
+        currentField += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === delimiter && !inQuotes) {
+      currentRow.push(currentField);
+      currentField = '';
+    } else if ((char === '\n' || char === '\r') && !inQuotes) {
+      if (char === '\r' && cleanedText[i + 1] === '\n') {
+        i += 1;
+      }
+      currentRow.push(currentField);
+      if (currentRow.some((value) => String(value).trim())) {
+        rows.push(currentRow);
+      }
+      currentRow = [];
+      currentField = '';
+    } else {
+      currentField += char;
+    }
+  }
+
+  if (currentField.length || currentRow.length) {
+    currentRow.push(currentField);
+    if (currentRow.some((value) => String(value).trim())) {
+      rows.push(currentRow);
+    }
+  }
+
+  if (!rows.length) return [];
+
   const [header, ...values] = rows;
-  const headers = header.map(h => h.trim().toLowerCase());
+  if (!header || !header.length) return [];
+
+  const normalizedHeaders = header.map((h) => normalizeKey(String(h).trim()));
+
   return values
-    .filter(row => row.some(value => String(value).trim()))
-    .map(row => {
+    .filter((row) => row.some((value) => String(value).trim()))
+    .map((row) => {
       const obj = {};
-      headers.forEach((headerName, index) => {
-        obj[headerName] = row[index] ? row[index].trim() : '';
+      normalizedHeaders.forEach((headerName, index) => {
+        obj[headerName] = String(row[index] ?? '').trim();
       });
       return obj;
     });
@@ -252,6 +425,16 @@ function parseUploadedFile(file) {
     reader.onerror = () => reject(new Error('The file could not be loaded.'));
     reader.readAsText(file);
   });
+}
+
+function updateUsernameStatus() {
+  const username = getCurrentUsername();
+  if (usernameInput) {
+    usernameInput.value = username === 'default' ? '' : username;
+  }
+  if (usernameStatus) {
+    usernameStatus.textContent = hasUsername() ? `Current user: ${username}` : 'Current user: not set';
+  }
 }
 
 function renderWordList() {
@@ -602,6 +785,60 @@ if (navBackButton) {
   navBackButton.addEventListener('click', showHomeScreen);
 }
 
+async function saveCurrentUsername(rawValue) {
+  const value = String(rawValue || '').trim();
+  if (!value) {
+    showStatus('Please enter a username before continuing.', 'error');
+    return false;
+  }
+
+  const username = setCurrentUsername(value);
+  updateUsernameStatus();
+  if (usernameModal) {
+    usernameModal.classList.add('hidden');
+  }
+  await syncUserDataFromCloud();
+  renderWordList();
+  renderSetList();
+  showStatus(`Saved user: ${username}`, 'success');
+  return true;
+}
+
+if (saveUsernameButton) {
+  saveUsernameButton.addEventListener('click', async () => {
+    await saveCurrentUsername(usernameInput ? usernameInput.value : '');
+  });
+}
+
+if (startSaveUsernameButton) {
+  startSaveUsernameButton.addEventListener('click', async () => {
+    await saveCurrentUsername(startUsernameInput ? startUsernameInput.value : '');
+  });
+}
+
+if (usernameInput) {
+  usernameInput.addEventListener('keydown', async (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      await saveCurrentUsername(usernameInput.value);
+    }
+  });
+}
+
+if (startUsernameInput) {
+  startUsernameInput.addEventListener('keydown', async (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      await saveCurrentUsername(startUsernameInput.value);
+    }
+  });
+}
+
+updateUsernameStatus();
+ensureUsernamePrompt();
+if (getCloudConfig()) {
+  syncUserDataFromCloud();
+}
 setActiveTab('words');
 
 document.getElementById('flip-btn').addEventListener('click', flipCard);
