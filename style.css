@@ -106,6 +106,7 @@ input {
 .content {
   display: grid;
   gap: 20px;
+  padding-bottom: 90px;
 }
 
 .tab-panel {
@@ -408,7 +409,7 @@ button.mini {
 
   .app-shell {
     max-width: 440px;
-    padding: 12px 10px 100px;
+    padding: 12px 10px 110px;
   }
 
   .topbar {
@@ -418,7 +419,7 @@ button.mini {
   }
 
   .topbar h1 {
-    font-size: 1.8rem;
+    font-size: 1.7rem;
     line-height: 1.1;
   }
 
@@ -431,18 +432,26 @@ button.mini {
     gap: 8px;
     padding: 8px;
     margin: 0;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.88);
-    box-shadow: 0 12px 32px rgba(20, 33, 61, 0.12);
+    border: 1px solid rgba(36, 71, 246, 0.12);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 12px 32px rgba(20, 33, 61, 0.14);
     backdrop-filter: blur(12px);
   }
 
   .tab-button {
-    min-height: 48px;
-    padding: 10px 8px;
-    font-size: 0.9rem;
+    min-height: 52px;
+    padding: 9px 8px;
+    font-size: 0.8rem;
     border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.01em;
+  }
+
+  .tab-button.active {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
   }
 
   .panel {
