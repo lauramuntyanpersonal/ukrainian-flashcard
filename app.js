@@ -41,8 +41,12 @@ const studyPanel = document.getElementById('study-panel');
 const flashcard = document.getElementById('flashcard');
 const studyTitle = document.getElementById('study-title');
 const backButton = document.getElementById('back-button');
-const resetButton = document.getElementById('reset-button');
 const navBackButton = document.getElementById('nav-back-button');
+const deleteCardButton = document.getElementById('delete-card-btn');
+const beginStudyButton = document.getElementById('begin-study-btn');
+const setReviewList = document.getElementById('set-review-list');
+const studyActions = document.querySelector('.study-actions');
+const studyFooter = document.querySelector('.study-footer');
 const tabButtons = document.querySelectorAll('.tab-button');
 const tabPanels = document.querySelectorAll('.tab-panel');
 const refreshWordsButton = document.getElementById('refresh-words-button');
@@ -403,21 +407,72 @@ function openSet(setId) {
     navBackButton.classList.remove('hidden');
   }
   studyTitle.textContent = set.name;
-  renderCurrentCard();
+  showSetReviewMode();
 }
 
 function showMainView() {
   studyPanel.classList.add('hidden');
   app.classList.remove('hidden');
+  if (setReviewList) setReviewList.classList.add('hidden');
+  if (beginStudyButton) beginStudyButton.classList.add('hidden');
+  if (flashcard) flashcard.classList.remove('hidden');
+  if (studyActions) studyActions.classList.remove('hidden');
+  if (studyFooter) studyFooter.classList.remove('hidden');
   currentSetId = null;
   currentIndex = 0;
   flipped = false;
   currentCards = [];
 }
 
+function renderSetReviewList() {
+  if (!setReviewList || !currentCards.length) {
+    if (setReviewList) setReviewList.innerHTML = '<p class="empty-state">No cards in this set yet.</p>';
+    return;
+  }
+
+  setReviewList.innerHTML = currentCards
+    .map((card, index) => `
+      <div class="review-item">
+        <strong>${index + 1}. ${card.front || 'Untitled word'}</strong>
+        <small>${card.back || card.phrase || card.note || 'No definition yet'}</small>
+        ${card.phrase ? `<small>Phrase: ${card.phrase}</small>` : ''}
+      </div>
+    `)
+    .join('');
+}
+
+function showSetReviewMode() {
+  if (setReviewList) {
+    setReviewList.classList.remove('hidden');
+    renderSetReviewList();
+  }
+  if (beginStudyButton) beginStudyButton.classList.remove('hidden');
+  if (flashcard) flashcard.classList.add('hidden');
+  if (studyActions) studyActions.classList.add('hidden');
+  if (studyFooter) studyFooter.classList.add('hidden');
+}
+
+function beginStudySession() {
+  if (setReviewList) setReviewList.classList.add('hidden');
+  if (beginStudyButton) beginStudyButton.classList.add('hidden');
+  if (flashcard) flashcard.classList.remove('hidden');
+  if (studyActions) studyActions.classList.remove('hidden');
+  if (studyFooter) studyFooter.classList.remove('hidden');
+  renderCurrentCard();
+}
+
 function renderCurrentCard() {
   const card = currentCards[currentIndex];
-  if (!card) return;
+  if (!card) {
+    frontText.textContent = 'No cards left';
+    backText.textContent = 'Delete or add a card to continue';
+    phraseText.textContent = '';
+    phraseTranslation.textContent = '';
+    noteText.textContent = '';
+    backSide.classList.add('hidden');
+    flipped = false;
+    return;
+  }
 
   frontText.textContent = card.front || 'No term';
   backText.textContent = card.back || 'No translation';
@@ -456,12 +511,36 @@ function handleSpeak() {
   speakText(flipped ? card.back : card.front);
 }
 
-function handleKnown() {
-  goNext();
-}
+function deleteCurrentCard() {
+  if (!currentSetId || !currentCards.length) return;
 
-function handleAgain() {
-  flipCard();
+  const currentCard = currentCards[currentIndex];
+  if (!currentCard) return;
+
+  const sets = readSets().map((set) => {
+    if (set.id !== currentSetId) return set;
+    return {
+      ...set,
+      cards: (set.cards || []).filter((card) => card.id !== currentCard.id),
+    };
+  });
+
+  saveSets(sets);
+
+  const updatedSet = sets.find((set) => set.id === currentSetId) || { cards: [] };
+  currentCards = updatedSet.cards || [];
+
+  if (!currentCards.length) {
+    renderCurrentCard();
+    renderSetList();
+    showStatus('Card deleted.', 'success');
+    return;
+  }
+
+  currentIndex = Math.min(currentIndex, currentCards.length - 1);
+  renderCurrentCard();
+  renderSetList();
+  showStatus('Card deleted.', 'success');
 }
 
 uploadForm.addEventListener('submit', handleUpload);
@@ -474,18 +553,19 @@ selectAllRowsButton.addEventListener('click', () => {
   });
 });
 backButton.addEventListener('click', showMainView);
-resetButton.addEventListener('click', () => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(demoSets));
-  localStorage.removeItem(WORD_BANK_KEY);
-  renderWordList();
-  renderSetList();
-  showStatus('Demo data restored.', 'success');
-});
 
 refreshWordsButton.addEventListener('click', () => {
   renderWordList();
   showStatus('Word list refreshed.', 'success');
 });
+
+if (deleteCardButton) {
+  deleteCardButton.addEventListener('click', deleteCurrentCard);
+}
+
+if (beginStudyButton) {
+  beginStudyButton.addEventListener('click', beginStudySession);
+}
 
 function setActiveTab(selectedTab) {
   tabButtons.forEach((tab) => tab.classList.toggle('active', tab.dataset.tab === selectedTab));
@@ -527,8 +607,6 @@ setActiveTab('words');
 document.getElementById('flip-btn').addEventListener('click', flipCard);
 document.getElementById('next-btn').addEventListener('click', goNext);
 document.getElementById('speak-btn').addEventListener('click', handleSpeak);
-document.getElementById('known-btn').addEventListener('click', handleKnown);
-document.getElementById('again-btn').addEventListener('click', handleAgain);
 flashcard.addEventListener('click', flipCard);
 
 renderPendingUploadRows();

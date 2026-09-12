@@ -43,7 +43,6 @@
         <section class="panel tab-panel" data-panel="sets">
           <div class="section-header">
             <h2>Your sets</h2>
-            <button id="reset-button" class="ghost mini" type="button">Reset demo</button>
           </div>
           <div id="set-list" class="set-list"></div>
         </section>
@@ -80,6 +79,9 @@
           </div>
         </header>
 
+        <div id="set-review-list" class="set-review-list hidden"></div>
+        <button id="begin-study-btn" class="primary hidden" type="button">Study set</button>
+
         <div id="flashcard" class="flashcard" aria-live="polite">
           <div class="card-side front-side">
             <span class="badge">Front</span>
@@ -101,8 +103,7 @@
         </div>
 
         <div class="study-footer">
-          <button id="known-btn" class="success" type="button">I know this</button>
-          <button id="again-btn" class="ghost" type="button">Again</button>
+          <button id="delete-card-btn" class="secondary" type="button">Delete card</button>
         </div>
       </section>
     </div>

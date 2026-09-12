@@ -343,6 +343,29 @@ button.mini {
   margin-top: 20px;
 }
 
+.set-review-list {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 16px;
+}
+
+.review-item {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel-alt);
+}
+
+.review-item strong {
+  font-size: 1rem;
+}
+
+.review-item small {
+  color: var(--muted);
+}
+
 .hidden {
   display: none !important;
 }
