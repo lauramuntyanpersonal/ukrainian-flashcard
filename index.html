@@ -19,6 +19,7 @@
           <p class="eyebrow">Language study</p>
           <h1>Ukrainian flashcards</h1>
         </div>
+        <button id="update-button" class="ghost mini" type="button">Update app</button>
       </header>
 
       <main class="content" id="app">
@@ -87,10 +88,79 @@
       </section>
     </div>
 
+    <div id="update-status" class="status" aria-live="polite"></div>
+
     <script>
+      const updateButton = document.getElementById('update-button');
+      const updateStatus = document.getElementById('update-status');
+      let refreshTimer = null;
+
+      function setUpdateStatus(message, kind = '') {
+        if (!updateStatus) return;
+        updateStatus.textContent = message;
+        updateStatus.className = 'status' + (kind ? ` ${kind}` : '');
+      }
+
+      function promptAppUpdate(registration) {
+        if (!registration || !registration.waiting) return;
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        setUpdateStatus('Update ready — reloading app...', 'success');
+        setTimeout(() => window.location.reload(), 500);
+      }
+
+      async function checkForServiceWorkerUpdate() {
+        if (!('serviceWorker' in navigator)) return;
+
+        try {
+          const registration = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+
+          registration.addEventListener('updatefound', () => {
+            const installingWorker = registration.installing;
+            if (!installingWorker) return;
+
+            installingWorker.addEventListener('statechange', () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                promptAppUpdate(registration);
+              }
+            });
+          });
+
+          await registration.update();
+          if (registration.waiting && navigator.serviceWorker.controller) {
+            promptAppUpdate(registration);
+          }
+        } catch (error) {
+          setUpdateStatus('Update check failed.', 'error');
+        }
+      }
+
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js').catch(() => {});
+          checkForServiceWorkerUpdate();
+
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (refreshTimer) return;
+            refreshTimer = setTimeout(() => {
+              window.location.reload();
+            }, 250);
+          });
+        });
+      }
+
+      if (updateButton) {
+        updateButton.addEventListener('click', async () => {
+          setUpdateStatus('Checking for updates...', '');
+          if ('serviceWorker' in navigator) {
+            const registration = await navigator.serviceWorker.getRegistration();
+            if (registration) {
+              await registration.update();
+              if (registration.waiting) {
+                promptAppUpdate(registration);
+                return;
+              }
+            }
+          }
+          setUpdateStatus('You are already on the latest version.', 'success');
         });
       }
     </script>
