@@ -200,6 +200,47 @@ button.mini {
   color: var(--muted);
 }
 
+.selection-panel {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.selection-list {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 18px;
+}
+
+.selection-row {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel-alt);
+  font-weight: 600;
+}
+
+.selection-row input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.selection-row strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.selection-row small {
+  display: block;
+  color: var(--muted);
+}
+
 .study-panel {
   margin-top: 20px;
 }

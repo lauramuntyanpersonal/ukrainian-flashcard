@@ -40,9 +40,18 @@
               <span>Choose CSV or JSON</span>
               <input type="file" id="file-input" accept=".csv,.json" required />
             </label>
-            <button type="submit">Upload set</button>
+            <button type="submit">Upload and review rows</button>
           </form>
           <div id="upload-status" class="status" aria-live="polite"></div>
+
+          <div id="selection-panel" class="selection-panel hidden">
+            <div class="section-header">
+              <h2>Choose rows for the set</h2>
+              <button id="select-all-rows" class="ghost mini" type="button">Select all</button>
+            </div>
+            <div id="selection-list" class="selection-list"></div>
+            <button id="create-selected-set" type="button">Create selected set</button>
+          </div>
         </section>
 
         <section class="panel">

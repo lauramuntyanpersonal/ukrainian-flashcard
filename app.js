@@ -31,9 +31,14 @@ const fileInput = document.getElementById('file-input');
 const setNameInput = document.getElementById('set-name');
 const setDescriptionInput = document.getElementById('set-description');
 const uploadStatus = document.getElementById('upload-status');
+const selectionPanel = document.getElementById('selection-panel');
+const selectionList = document.getElementById('selection-list');
+const createSelectedSetButton = document.getElementById('create-selected-set');
+const selectAllRowsButton = document.getElementById('select-all-rows');
 const setList = document.getElementById('set-list');
 const app = document.getElementById('app');
 const studyPanel = document.getElementById('study-panel');
+const flashcard = document.getElementById('flashcard');
 const studyTitle = document.getElementById('study-title');
 const backButton = document.getElementById('back-button');
 const resetButton = document.getElementById('reset-button');
@@ -49,6 +54,7 @@ let currentSetId = null;
 let currentIndex = 0;
 let flipped = false;
 let currentCards = [];
+let pendingUploadRows = [];
 
 function toId(value) {
   return `${value.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-` + Date.now().toString(36);
@@ -73,28 +79,46 @@ function saveSets(sets) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sets));
 }
 
+function normalizeKey(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
 function getFirstNonEmpty(obj, candidates) {
+  const normalized = Object.fromEntries(
+    Object.entries(obj || {}).map(([key, value]) => [normalizeKey(key), value])
+  );
+
   for (const key of candidates) {
-    const value = obj[key];
+    const normalizedKey = normalizeKey(key);
+    const value = normalized[normalizedKey] ?? obj?.[key] ?? obj?.[key.toUpperCase()] ?? obj?.[key.toLowerCase()];
     if (value !== undefined && value !== null && String(value).trim()) {
       return String(value).trim();
     }
   }
+
   return '';
 }
 
 function makeCard(raw, idx) {
-  const front = getFirstNonEmpty(raw, ['front', 'ukrainian', 'word', 'term', 'text', 'lemma']);
-  const back = getFirstNonEmpty(raw, ['back', 'english', 'translation', 'meaning', 'value', 'translation_en']);
-  if (!front || !back) return null;
+  const front = getFirstNonEmpty(raw, ['lemme', 'lemma', 'word', 'term', 'text', 'ukrainian', 'front', 'f', 'column_f']);
+  const back = getFirstNonEmpty(raw, ['definition', 'word_definition', 'meaning', 'def', 'translation', 'english', 'back', 'i', 'column_i']);
+  const phrase = getFirstNonEmpty(raw, ['subtitle', 'phrase', 'example', 'sentence', 'context', 'c', 'column_c']);
+  const phraseTranslation = getFirstNonEmpty(raw, ['phrase_translation', 'example_en', 'translation_phrase', 'context_en', 'sentence_translation']);
+  const note = getFirstNonEmpty(raw, ['note', 'notes', 'comment', 'category', 'part_of_speech']);
+
+  if (!front || (!back && !phrase && !note)) return null;
 
   return {
     id: raw.id || `card-${idx}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
     front,
-    back,
-    phrase: getFirstNonEmpty(raw, ['phrase', 'example_uk', 'sentence', 'example', 'context_uk', 'phrase_uk']),
-    phrase_translation: getFirstNonEmpty(raw, ['phrase_translation', 'example_en', 'translation_phrase', 'context_en', 'sentence_translation']),
-    note: getFirstNonEmpty(raw, ['note', 'notes', 'comment', 'category', 'part_of_speech']),
+    back: back || phrase || note,
+    phrase: phrase || note || '',
+    phrase_translation: phraseTranslation || '',
+    note: note || '',
   };
 }
 
@@ -211,6 +235,63 @@ function showStatus(message, kind = '') {
   uploadStatus.className = `status ${kind}`.trim();
 }
 
+function renderPendingUploadRows() {
+  if (!pendingUploadRows.length) {
+    selectionPanel.classList.add('hidden');
+    selectionList.innerHTML = '';
+    return;
+  }
+
+  selectionPanel.classList.remove('hidden');
+  selectionList.innerHTML = pendingUploadRows
+    .map((card, index) => `
+      <label class="selection-row">
+        <input type="checkbox" data-row-index="${index}" checked />
+        <span>
+          <strong>${card.front}</strong>
+          <small>${card.back || card.phrase || card.note || 'No details yet'}</small>
+        </span>
+      </label>
+    `)
+    .join('');
+}
+
+function createSetFromSelectedRows() {
+  if (!pendingUploadRows.length) {
+    showStatus('Upload a CSV or JSON file first.', 'error');
+    return;
+  }
+
+  const checkedInputs = [...selectionList.querySelectorAll('input[type="checkbox"]:checked')];
+  const selectedCards = checkedInputs
+    .map((input) => pendingUploadRows[Number(input.dataset.rowIndex)])
+    .filter(Boolean);
+
+  if (!selectedCards.length) {
+    showStatus('Select at least one row before creating a study set.', 'error');
+    return;
+  }
+
+  const sets = readSets();
+  const name = setNameInput.value.trim() || `Custom set ${sets.length + 1}`;
+  const description = setDescriptionInput.value.trim() || 'Custom vocabulary set';
+
+  const newSet = {
+    id: toId(name),
+    name,
+    description,
+    cards: selectedCards,
+  };
+
+  saveSets([newSet, ...sets]);
+  pendingUploadRows = [];
+  renderPendingUploadRows();
+  renderSetList();
+  uploadForm.reset();
+  showStatus(`Created set: ${name}`, 'success');
+  openSet(newSet.id);
+}
+
 async function handleUpload(event) {
   event.preventDefault();
   const file = fileInput.files[0];
@@ -228,23 +309,14 @@ async function handleUpload(event) {
       return;
     }
 
-    const sets = readSets();
-    const name = setNameInput.value.trim() || file.name.replace(/\.[^.]+$/, '');
-    const description = setDescriptionInput.value.trim() || 'Custom vocabulary set';
-
-    const newSet = {
-      id: toId(name),
-      name,
-      description,
-      cards,
-    };
-
-    saveSets([newSet, ...sets]);
-    renderSetList();
-    showStatus(`Set uploaded: ${name}`, 'success');
-    uploadForm.reset();
-    openSet(newSet.id);
+    pendingUploadRows = cards;
+    renderPendingUploadRows();
+    const defaultName = setNameInput.value.trim() || file.name.replace(/\.[^.]+$/, '');
+    setNameInput.value = defaultName;
+    showStatus(`Loaded ${cards.length} rows. Select the ones you want, then create the set.`, 'success');
   } catch (error) {
+    pendingUploadRows = [];
+    renderPendingUploadRows();
     showStatus(error.message, 'error');
   }
 }
@@ -323,6 +395,14 @@ function handleAgain() {
 }
 
 uploadForm.addEventListener('submit', handleUpload);
+createSelectedSetButton.addEventListener('click', createSetFromSelectedRows);
+selectAllRowsButton.addEventListener('click', () => {
+  const checkboxes = selectionList.querySelectorAll('input[type="checkbox"]');
+  const allChecked = [...checkboxes].every((checkbox) => checkbox.checked);
+  checkboxes.forEach((checkbox) => {
+    checkbox.checked = !allChecked;
+  });
+});
 backButton.addEventListener('click', showMainView);
 resetButton.addEventListener('click', () => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(demoSets));
@@ -337,5 +417,6 @@ document.getElementById('known-btn').addEventListener('click', handleKnown);
 document.getElementById('again-btn').addEventListener('click', handleAgain);
 flashcard.addEventListener('click', flipCard);
 
+renderPendingUploadRows();
 renderSetList();
 showStatus('');
