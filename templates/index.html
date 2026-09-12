@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ukrainian Flashcards</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Language study</p>
+          <h1>Ukrainian flashcards</h1>
+        </div>
+      </header>
+
+      <main class="content">
+        <section class="panel upload-panel">
+          <h2>Upload a new word set</h2>
+          <form id="upload-form" enctype="multipart/form-data">
+            <label>
+              Study set name
+              <input type="text" name="set_name" placeholder="Everyday Ukrainian" />
+            </label>
+            <label>
+              Description
+              <input type="text" name="description" placeholder="Travel phrases and daily vocabulary" />
+            </label>
+            <label class="file-picker">
+              <span>Choose CSV or JSON</span>
+              <input type="file" name="file" accept=".csv,.json" required />
+            </label>
+            <button type="submit">Upload set</button>
+          </form>
+          <div id="upload-status" class="status" aria-live="polite"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Your sets</h2>
+          {% if sets %}
+            <div class="set-list">
+              {% for study_set in sets %}
+                <a class="set-item" href="{{ url_for('study_set', set_id=study_set.id) }}">
+                  <div>
+                    <strong>{{ study_set.name }}</strong>
+                    <small>{{ study_set.cards|length }} cards</small>
+                  </div>
+                  <span>Study →</span>
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="empty-state">No sets yet. Upload your first CSV or JSON file.</p>
+          {% endif %}
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const uploadForm = document.getElementById('upload-form');
+      const statusEl = document.getElementById('upload-status');
+
+      uploadForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        statusEl.textContent = 'Uploading...';
+        statusEl.className = 'status';
+
+        const formData = new FormData(uploadForm);
+
+        try {
+          const response = await fetch('/upload-set', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error || 'Upload failed.');
+          }
+
+          statusEl.textContent = `Set uploaded: ${data.name}`;
+          statusEl.classList.add('success');
+          setTimeout(() => {
+            window.location.href = `/study/${data.set_id}`;
+          }, 600);
+        } catch (error) {
+          statusEl.textContent = error.message;
+          statusEl.classList.add('error');
+        }
+      });
+    </script>
+  </body>
+</html>

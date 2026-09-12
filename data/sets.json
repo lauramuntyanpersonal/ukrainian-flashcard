@@ -1,0 +1,27 @@
+{
+  "sets": [
+    {
+      "id": "daily-ukrainian",
+      "name": "Daily Ukrainian",
+      "description": "A starter set with everyday vocabulary and sentence context.",
+      "cards": [
+        {
+          "id": "card-1",
+          "front": "привіт",
+          "back": "hello",
+          "phrase": "Привіт! Як справи?",
+          "phrase_translation": "Hi! How are you?",
+          "note": "Common greeting"
+        },
+        {
+          "id": "card-2",
+          "front": "дякую",
+          "back": "thank you",
+          "phrase": "Дякую за допомогу.",
+          "phrase_translation": "Thank you for your help.",
+          "note": "Useful polite phrase"
+        }
+      ]
+    }
+  ]
+}

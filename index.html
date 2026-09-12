@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ukrainian Flashcards</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Language study</p>
+          <h1>Ukrainian flashcards</h1>
+        </div>
+      </header>
+
+      <main class="content" id="app">
+        <section class="panel upload-panel">
+          <h2>Upload a new word set</h2>
+          <form id="upload-form">
+            <label>
+              Study set name
+              <input type="text" id="set-name" placeholder="Everyday Ukrainian" />
+            </label>
+            <label>
+              Description
+              <input type="text" id="set-description" placeholder="Travel phrases and daily vocabulary" />
+            </label>
+            <label class="file-picker">
+              <span>Choose CSV or JSON</span>
+              <input type="file" id="file-input" accept=".csv,.json" required />
+            </label>
+            <button type="submit">Upload set</button>
+          </form>
+          <div id="upload-status" class="status" aria-live="polite"></div>
+        </section>
+
+        <section class="panel">
+          <div class="section-header">
+            <h2>Your sets</h2>
+            <button id="reset-button" class="ghost mini" type="button">Reset demo</button>
+          </div>
+          <div id="set-list" class="set-list"></div>
+        </section>
+      </main>
+
+      <section id="study-panel" class="panel study-panel hidden">
+        <header class="topbar compact">
+          <button id="back-button" class="secondary mini" type="button">← Back</button>
+          <div>
+            <p class="eyebrow">Study set</p>
+            <h2 id="study-title">Set</h2>
+          </div>
+        </header>
+
+        <div id="flashcard" class="flashcard" aria-live="polite">
+          <div class="card-side front-side">
+            <span class="badge">Front</span>
+            <h2 id="front-text">Loading...</h2>
+          </div>
+          <div class="card-side back-side hidden" id="back-side">
+            <span class="badge accent">Back</span>
+            <h3 id="back-text"></h3>
+            <p id="phrase-text"></p>
+            <p id="phrase-translation" class="muted"></p>
+            <small id="note-text"></small>
+          </div>
+        </div>
+
+        <div class="study-actions">
+          <button id="speak-btn" class="secondary" type="button">🔊 Hear it</button>
+          <button id="flip-btn" type="button">Flip card</button>
+          <button id="next-btn" class="secondary" type="button">Next</button>
+        </div>
+
+        <div class="study-footer">
+          <button id="known-btn" class="success" type="button">I know this</button>
+          <button id="again-btn" class="ghost" type="button">Again</button>
+        </div>
+      </section>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

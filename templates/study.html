@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ study_set.name }} | Ukrainian Flashcards</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <div class="app-shell study-page">
+      <header class="topbar compact">
+        <a href="{{ url_for('index') }}" class="back-link">← Back</a>
+        <div>
+          <p class="eyebrow">Study set</p>
+          <h1>{{ study_set.name }}</h1>
+        </div>
+      </header>
+
+      <main class="study-layout">
+        <section class="card-panel">
+          <div id="flashcard" class="flashcard" aria-live="polite">
+            <div class="card-side front-side">
+              <span class="badge">Front</span>
+              <h2 id="front-text">Loading...</h2>
+            </div>
+            <div class="card-side back-side hidden" id="back-side">
+              <span class="badge accent">Back</span>
+              <h3 id="back-text"></h3>
+              <p id="phrase-text"></p>
+              <p id="phrase-translation" class="muted"></p>
+              <small id="note-text"></small>
+            </div>
+          </div>
+
+          <div class="study-actions">
+            <button id="speak-btn" class="secondary">🔊 Hear it</button>
+            <button id="flip-btn">Flip card</button>
+            <button id="next-btn" class="secondary">Next</button>
+          </div>
+
+          <div class="study-footer">
+            <button id="known-btn" class="success">I know this</button>
+            <button id="again-btn" class="ghost">Again</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const cards = {{ study_set.cards|tojson }};
+      const flashcard = document.getElementById('flashcard');
+      const frontText = document.getElementById('front-text');
+      const backText = document.getElementById('back-text');
+      const phraseText = document.getElementById('phrase-text');
+      const phraseTranslation = document.getElementById('phrase-translation');
+      const noteText = document.getElementById('note-text');
+      const backSide = document.getElementById('back-side');
+      let currentIndex = 0;
+      let flipped = false;
+
+      function renderCard() {
+        const card = cards[currentIndex];
+        if (!card) return;
+
+        frontText.textContent = card.front || 'No term';
+        backText.textContent = card.back || 'No translation';
+        phraseText.textContent = card.phrase ? `Example: ${card.phrase}` : 'No phrase saved';
+        phraseTranslation.textContent = card.phrase_translation || '';
+        noteText.textContent = card.note ? `Note: ${card.note}` : '';
+
+        backSide.classList.add('hidden');
+        flashcard.classList.remove('is-flipped');
+        flipped = false;
+      }
+
+      function flipCard() {
+        flipped = !flipped;
+        if (flipped) {
+          backSide.classList.remove('hidden');
+          flashcard.classList.add('is-flipped');
+        } else {
+          backSide.classList.add('hidden');
+          flashcard.classList.remove('is-flipped');
+        }
+      }
+
+      function goNext() {
+        currentIndex = (currentIndex + 1) % cards.length;
+        renderCard();
+      }
+
+      function speak(text) {
+        if (!text) return;
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'uk-UA';
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(utterance);
+        }
+      }
+
+      document.getElementById('flip-btn').addEventListener('click', flipCard);
+      document.getElementById('next-btn').addEventListener('click', goNext);
+      document.getElementById('known-btn').addEventListener('click', () => {
+        goNext();
+      });
+      document.getElementById('again-btn').addEventListener('click', () => {
+        flipCard();
+      });
+      document.getElementById('speak-btn').addEventListener('click', () => {
+        const card = cards[currentIndex];
+        const textToRead = flipped ? (card.back || card.front) : card.front;
+        speak(textToRead);
+      });
+
+      flashcard.addEventListener('click', flipCard);
+      renderCard();
+    </script>
+  </body>
+</html>
