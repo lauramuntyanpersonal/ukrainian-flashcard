@@ -3,21 +3,53 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2447f6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Ukrainian Flashcards" />
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='icon-192.png') }}" />
     <title>Ukrainian Flashcards</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   </head>
   <body>
-    <div class="app-shell">
+    <div class="phone-shell">
       <header class="topbar">
         <div>
-          <p class="eyebrow">Language study</p>
-          <h1>Ukrainian flashcards</h1>
+          <p class="eyebrow">Daily practice</p>
+          <h1>Ukrainian</h1>
         </div>
+        <button class="icon-button" aria-label="Add new set">＋</button>
       </header>
 
       <main class="content">
+        <section class="hero-card">
+          <div>
+            <span class="mini-label">Current streak</span>
+            <h2>3 day streak</h2>
+          </div>
+          <div class="score-chip">18 cards</div>
+        </section>
+
+        <section class="stats-row">
+          <div class="stat-box">
+            <span>Learned</span>
+            <strong>42</strong>
+          </div>
+          <div class="stat-box">
+            <span>Today</span>
+            <strong>12</strong>
+          </div>
+          <div class="stat-box">
+            <span>Mastered</span>
+            <strong>8</strong>
+          </div>
+        </section>
+
         <section class="panel upload-panel">
-          <h2>Upload a new word set</h2>
+          <div class="section-header">
+            <h3>Upload a new set</h3>
+          </div>
           <form id="upload-form" enctype="multipart/form-data">
             <label>
               Study set name
@@ -36,17 +68,19 @@
           <div id="upload-status" class="status" aria-live="polite"></div>
         </section>
 
-        <section class="panel">
-          <h2>Your sets</h2>
+        <section class="panel set-panel">
+          <div class="section-header">
+            <h3>Your sets</h3>
+          </div>
           {% if sets %}
             <div class="set-list">
               {% for study_set in sets %}
                 <a class="set-item" href="{{ url_for('study_set', set_id=study_set.id) }}">
-                  <div>
+                  <div class="set-copy">
                     <strong>{{ study_set.name }}</strong>
                     <small>{{ study_set.cards|length }} cards</small>
                   </div>
-                  <span>Study →</span>
+                  <span class="arrow">→</span>
                 </a>
               {% endfor %}
             </div>
@@ -55,9 +89,21 @@
           {% endif %}
         </section>
       </main>
+
+      <nav class="bottom-nav" aria-label="Main navigation">
+        <button class="nav-item active">Home</button>
+        <button class="nav-item">Study</button>
+        <button class="nav-item">Stats</button>
+      </nav>
     </div>
 
     <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('{{ url_for("static", filename="sw.js") }}');
+        });
+      }
+
       const uploadForm = document.getElementById('upload-form');
       const statusEl = document.getElementById('upload-status');
 

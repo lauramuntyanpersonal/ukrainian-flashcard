@@ -227,4 +227,5 @@ def api_single_set(set_id: str):
 
 if __name__ == "__main__":
     ensure_storage()
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    port = int(os.environ.get("PORT", "5001"))
+    app.run(host="0.0.0.0", port=port, debug=False)

@@ -1,0 +1,23 @@
+{
+  "name": "Ukrainian Flashcards",
+  "short_name": "Flashcards",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#2447f6",
+  "description": "A mobile-friendly flashcard app for studying Ukrainian vocabulary.",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

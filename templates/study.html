@@ -3,14 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2447f6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Ukrainian Flashcards" />
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='icon-192.png') }}" />
     <title>{{ study_set.name }} | Ukrainian Flashcards</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   </head>
   <body>
-    <div class="app-shell study-page">
+    <div class="phone-shell study-phone-shell">
       <header class="topbar compact">
-        <a href="{{ url_for('index') }}" class="back-link">← Back</a>
-        <div>
+        <a href="{{ url_for('index') }}" class="back-link">←</a>
+        <div class="study-heading">
           <p class="eyebrow">Study set</p>
           <h1>{{ study_set.name }}</h1>
         </div>
@@ -18,6 +24,10 @@
 
       <main class="study-layout">
         <section class="card-panel">
+          <div class="progress-bar">
+            <span id="progress-indicator" style="width: 15%"></span>
+          </div>
+
           <div id="flashcard" class="flashcard" aria-live="polite">
             <div class="card-side front-side">
               <span class="badge">Front</span>
@@ -32,21 +42,32 @@
             </div>
           </div>
 
+          <div class="meta-row">
+            <span id="card-counter">1 / {{ study_set.cards|length }}</span>
+            <span>Tap to flip</span>
+          </div>
+
           <div class="study-actions">
-            <button id="speak-btn" class="secondary">🔊 Hear it</button>
-            <button id="flip-btn">Flip card</button>
+            <button id="speak-btn" class="secondary">🔊</button>
+            <button id="flip-btn" class="primary">Flip</button>
             <button id="next-btn" class="secondary">Next</button>
           </div>
 
           <div class="study-footer">
-            <button id="known-btn" class="success">I know this</button>
             <button id="again-btn" class="ghost">Again</button>
+            <button id="known-btn" class="success">I know it</button>
           </div>
         </section>
       </main>
     </div>
 
     <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('{{ url_for("static", filename="sw.js") }}');
+        });
+      }
+
       const cards = {{ study_set.cards|tojson }};
       const flashcard = document.getElementById('flashcard');
       const frontText = document.getElementById('front-text');
@@ -55,8 +76,16 @@
       const phraseTranslation = document.getElementById('phrase-translation');
       const noteText = document.getElementById('note-text');
       const backSide = document.getElementById('back-side');
+      const progressIndicator = document.getElementById('progress-indicator');
+      const cardCounter = document.getElementById('card-counter');
       let currentIndex = 0;
       let flipped = false;
+
+      function updateProgress() {
+        const progress = ((currentIndex + 1) / Math.max(cards.length, 1)) * 100;
+        progressIndicator.style.width = `${Math.max(10, progress)}%`;
+        cardCounter.textContent = `${currentIndex + 1} / ${cards.length}`;
+      }
 
       function renderCard() {
         const card = cards[currentIndex];
@@ -71,6 +100,7 @@
         backSide.classList.add('hidden');
         flashcard.classList.remove('is-flipped');
         flipped = false;
+        updateProgress();
       }
 
       function flipCard() {
@@ -105,7 +135,11 @@
         goNext();
       });
       document.getElementById('again-btn').addEventListener('click', () => {
-        flipCard();
+        flashcard.classList.add('shake');
+        setTimeout(() => flashcard.classList.remove('shake'), 350);
+        if (!flipped) {
+          flipCard();
+        }
       });
       document.getElementById('speak-btn').addEventListener('click', () => {
         const card = cards[currentIndex];
