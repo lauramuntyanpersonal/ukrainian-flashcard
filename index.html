@@ -8,11 +8,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Ukrainian Flashcards" />
     <title>Ukrainian Flashcards</title>
-    <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="icon" href="./icon-192.png" type="image/png" sizes="192x192" />
-    <link rel="apple-touch-icon" href="./icon-192.png" sizes="192x192" type="image/png" />
-    <link rel="apple-touch-icon" href="./icon-512.png" sizes="512x512" type="image/png" />
-    <link rel="stylesheet" href="./style.css" />
+    <link rel="manifest" href="./manifest.webmanifest?v=20260912-1" />
+    <link rel="icon" href="./icon-192.png?v=20260912-1" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="./icon-192.png?v=20260912-1" sizes="192x192" type="image/png" />
+    <link rel="apple-touch-icon" href="./icon-512.png?v=20260912-1" sizes="512x512" type="image/png" />
+    <link rel="stylesheet" href="./style.css?v=20260912-1" />
   </head>
   <body>
     <div class="app-shell">
@@ -116,15 +116,15 @@
       function promptAppUpdate(registration) {
         if (!registration || !registration.waiting) return;
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-        setUpdateStatus('Update ready — reloading app...', 'success');
-        setTimeout(() => window.location.reload(), 500);
+        setUpdateStatus('Update ready — refreshing app...', 'success');
+        setTimeout(() => window.location.reload(), 300);
       }
 
       async function checkForServiceWorkerUpdate() {
         if (!('serviceWorker' in navigator)) return;
 
         try {
-          const registration = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+          const registration = await navigator.serviceWorker.register('./sw.js?v=20260912-1', { updateViaCache: 'none' });
 
           registration.addEventListener('updatefound', () => {
             const installingWorker = registration.installing;
@@ -146,6 +146,25 @@
         }
       }
 
+      async function refreshIfNeeded() {
+        if (!('serviceWorker' in navigator)) return;
+
+        try {
+          const registration = await navigator.serviceWorker.getRegistration();
+          if (!registration) {
+            await checkForServiceWorkerUpdate();
+            return;
+          }
+
+          await registration.update();
+          if (registration.waiting) {
+            promptAppUpdate(registration);
+          }
+        } catch (error) {
+          setUpdateStatus('Checking for refresh...', '');
+        }
+      }
+
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           checkForServiceWorkerUpdate();
@@ -156,6 +175,16 @@
               window.location.reload();
             }, 250);
           });
+        });
+
+        document.addEventListener('visibilitychange', () => {
+          if (!document.hidden) {
+            refreshIfNeeded();
+          }
+        });
+
+        window.addEventListener('focus', () => {
+          refreshIfNeeded();
         });
       }
 
@@ -176,6 +205,6 @@
         });
       }
     </script>
-    <script src="./app.js"></script>
+    <script src="./app.js?v=20260912-1"></script>
   </body>
 </html>

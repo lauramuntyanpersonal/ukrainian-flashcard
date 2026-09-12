@@ -1,11 +1,11 @@
-const CACHE_NAME = 'ukrainian-flashcards-v3';
+const CACHE_NAME = 'ukrainian-flashcards-v4';
 const ASSETS = [
   './',
-  './style.css',
-  './manifest.webmanifest',
-  './icon-192.png',
-  './icon-512.png',
-  './app.js'
+  './style.css?v=20260912-1',
+  './manifest.webmanifest?v=20260912-1',
+  './icon-192.png?v=20260912-1',
+  './icon-512.png?v=20260912-1',
+  './app.js?v=20260912-1'
 ];
 
 self.addEventListener('message', (event) => {
