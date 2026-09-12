@@ -41,6 +41,12 @@ body {
   margin-bottom: 20px;
 }
 
+@supports (padding: max(0px)) {
+  .app-shell {
+    padding-bottom: calc(48px + env(safe-area-inset-bottom));
+  }
+}
+
 .topbar.compact {
   margin-bottom: 12px;
 }
@@ -396,33 +402,62 @@ button.mini {
 }
 
 @media (max-width: 640px) {
+  body {
+    background: linear-gradient(180deg, #edf5ff 0%, #f9fbff 100%);
+  }
+
   .app-shell {
-    padding-top: 12px;
+    max-width: 440px;
+    padding: 12px 10px 100px;
   }
 
   .topbar {
     align-items: flex-start;
     gap: 12px;
+    margin-bottom: 12px;
   }
 
   .topbar h1 {
     font-size: 1.8rem;
+    line-height: 1.1;
   }
 
   .tab-bar {
+    position: fixed;
+    left: 50%;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    width: min(420px, calc(100% - 18px));
     gap: 8px;
-    padding-inline: 12px;
+    padding: 8px;
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 12px 32px rgba(20, 33, 61, 0.12);
+    backdrop-filter: blur(12px);
   }
 
   .tab-button {
-    min-height: 42px;
+    min-height: 48px;
     padding: 10px 8px;
     font-size: 0.9rem;
+    border-radius: 14px;
   }
 
   .panel {
     padding: 16px;
     border-radius: 16px;
+  }
+
+  .section-header {
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .section-header h2 {
+    margin-bottom: 0;
+    font-size: 1.1rem;
   }
 
   .study-actions,
