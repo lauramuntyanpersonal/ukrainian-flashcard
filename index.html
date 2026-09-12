@@ -137,11 +137,26 @@
 
       checkRemoteVersion();
 
+      function hardReloadApp() {
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+        }
+
+        setUpdateStatus('Refreshing app cache...', 'success');
+
+        const cacheKeys = ['ukrainian-flashcards-version'];
+        cacheKeys.forEach((key) => localStorage.removeItem(key));
+
+        const noCacheUrl = new URL(window.location.href);
+        noCacheUrl.searchParams.set('v', Date.now().toString());
+        window.location.replace(noCacheUrl.toString());
+      }
+
       function promptAppUpdate(registration) {
         if (!registration || !registration.waiting) return;
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
         setUpdateStatus('Update ready — refreshing app...', 'success');
-        setTimeout(() => window.location.reload(), 300);
+        setTimeout(() => hardReloadApp(), 300);
       }
 
       async function checkForServiceWorkerUpdate() {
@@ -225,7 +240,9 @@
               }
             }
           }
-          setUpdateStatus('You are already on the latest version.', 'success');
+
+          setUpdateStatus('Refreshing app...', 'success');
+          hardReloadApp();
         });
       }
     </script>
