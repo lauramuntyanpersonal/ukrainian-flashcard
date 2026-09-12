@@ -24,8 +24,30 @@
         <button id="update-button" class="ghost mini" type="button">Update app</button>
       </header>
 
+      <nav class="tab-bar" aria-label="Primary navigation">
+        <button type="button" class="tab-button active" data-tab="words">Words</button>
+        <button type="button" class="tab-button" data-tab="sets">Sets</button>
+        <button type="button" class="tab-button" data-tab="upload">Upload</button>
+      </nav>
+
       <main class="content" id="app">
-        <section class="panel upload-panel">
+        <section class="panel tab-panel active" data-panel="words">
+          <div class="section-header">
+            <h2>All words</h2>
+            <button id="refresh-words-button" class="ghost mini" type="button">Refresh</button>
+          </div>
+          <div id="words-list" class="words-list"></div>
+        </section>
+
+        <section class="panel tab-panel" data-panel="sets">
+          <div class="section-header">
+            <h2>Your sets</h2>
+            <button id="reset-button" class="ghost mini" type="button">Reset demo</button>
+          </div>
+          <div id="set-list" class="set-list"></div>
+        </section>
+
+        <section class="panel upload-panel tab-panel" data-panel="upload">
           <h2>Upload a new word set</h2>
           <form id="upload-form">
             <p class="helper-text">Upload your full CSV or JSON as a raw word bank. You can choose the rows you want and make flashcards later.</p>
@@ -45,14 +67,6 @@
             <div id="selection-list" class="selection-list"></div>
             <button id="create-selected-set" type="button">Create selected set</button>
           </div>
-        </section>
-
-        <section class="panel">
-          <div class="section-header">
-            <h2>Your sets</h2>
-            <button id="reset-button" class="ghost mini" type="button">Reset demo</button>
-          </div>
-          <div id="set-list" class="set-list"></div>
         </section>
       </main>
 

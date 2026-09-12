@@ -68,9 +68,39 @@ input {
   font: inherit;
 }
 
+.tab-bar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 980px;
+  margin: 0 auto 18px;
+  padding: 0 16px;
+}
+
+.tab-button {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 18px rgba(20, 33, 61, 0.04);
+}
+
+.tab-button.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
 .content {
   display: grid;
   gap: 20px;
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
 }
 
 .panel {
@@ -175,9 +205,38 @@ button.mini {
   margin-bottom: 16px;
 }
 
+.words-list,
 .set-list {
   display: grid;
   gap: 12px;
+}
+
+.word-row {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel-alt);
+}
+
+.word-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.word-main strong {
+  font-size: 1.05rem;
+}
+
+.word-main span {
+  color: var(--muted);
+}
+
+.word-phrase {
+  color: var(--text);
+  font-weight: 600;
 }
 
 .set-item {

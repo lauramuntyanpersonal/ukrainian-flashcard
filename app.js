@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'ukrainian-flashcards-sets-v1';
+const WORD_BANK_KEY = 'ukrainian-flashcards-word-bank-v1';
 
 const demoSets = [
   {
@@ -28,20 +29,22 @@ const demoSets = [
 
 const uploadForm = document.getElementById('upload-form');
 const fileInput = document.getElementById('file-input');
-const setNameInput = document.getElementById('set-name');
-const setDescriptionInput = document.getElementById('set-description');
 const uploadStatus = document.getElementById('upload-status');
 const selectionPanel = document.getElementById('selection-panel');
 const selectionList = document.getElementById('selection-list');
 const createSelectedSetButton = document.getElementById('create-selected-set');
 const selectAllRowsButton = document.getElementById('select-all-rows');
 const setList = document.getElementById('set-list');
+const wordsList = document.getElementById('words-list');
 const app = document.getElementById('app');
 const studyPanel = document.getElementById('study-panel');
 const flashcard = document.getElementById('flashcard');
 const studyTitle = document.getElementById('study-title');
 const backButton = document.getElementById('back-button');
 const resetButton = document.getElementById('reset-button');
+const tabButtons = document.querySelectorAll('.tab-button');
+const tabPanels = document.querySelectorAll('.tab-panel');
+const refreshWordsButton = document.getElementById('refresh-words-button');
 
 const frontText = document.getElementById('front-text');
 const backText = document.getElementById('back-text');
@@ -77,6 +80,45 @@ function readSets() {
 
 function saveSets(sets) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sets));
+}
+
+function readWordBank() {
+  const raw = localStorage.getItem(WORD_BANK_KEY);
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveWordBank(words) {
+  localStorage.setItem(WORD_BANK_KEY, JSON.stringify(words));
+}
+
+function mergeWordBank(items) {
+  const existing = readWordBank();
+  const combined = [...existing, ...items];
+  const seen = new Set();
+
+  const merged = combined.filter((item) => {
+    const signature = [
+      item.front || '',
+      item.back || '',
+      item.phrase || '',
+      item.note || '',
+    ].join('|');
+
+    if (!signature.trim()) return false;
+    if (seen.has(signature)) return false;
+    seen.add(signature);
+    return true;
+  });
+
+  saveWordBank(merged);
+  return merged;
 }
 
 function normalizeKey(value) {
@@ -206,6 +248,26 @@ function parseUploadedFile(file) {
   });
 }
 
+function renderWordList() {
+  const words = readWordBank();
+  if (!words.length) {
+    wordsList.innerHTML = '<p class="empty-state">No words yet. Upload a CSV or JSON to build your word bank.</p>';
+    return;
+  }
+
+  wordsList.innerHTML = words
+    .map((word, index) => `
+      <div class="word-row" data-word-index="${index}">
+        <div class="word-main">
+          <strong>${word.front || 'Untitled word'}</strong>
+          <span>${word.back || word.phrase || word.note || 'No definition yet'}</span>
+        </div>
+        ${word.phrase ? `<small class="word-phrase">${word.phrase}</small>` : ''}
+      </div>
+    `)
+    .join('');
+}
+
 function renderSetList() {
   const sets = readSets();
   if (!sets.length) {
@@ -310,6 +372,8 @@ async function handleUpload(event) {
     }
 
     pendingUploadRows = cards;
+    mergeWordBank(cards);
+    renderWordList();
     renderPendingUploadRows();
     showStatus(`Loaded ${cards.length} rows into your word bank. Pick the rows you want and create a flashcard set from them.`, 'success');
   } catch (error) {
@@ -404,8 +468,25 @@ selectAllRowsButton.addEventListener('click', () => {
 backButton.addEventListener('click', showMainView);
 resetButton.addEventListener('click', () => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(demoSets));
+  localStorage.removeItem(WORD_BANK_KEY);
+  renderWordList();
   renderSetList();
   showStatus('Demo data restored.', 'success');
+});
+
+refreshWordsButton.addEventListener('click', () => {
+  renderWordList();
+  showStatus('Word list refreshed.', 'success');
+});
+
+tabButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    const selectedTab = button.dataset.tab;
+    tabButtons.forEach((tab) => tab.classList.toggle('active', tab === button));
+    tabPanels.forEach((panel) => {
+      panel.classList.toggle('active', panel.dataset.panel === selectedTab);
+    });
+  });
 });
 
 document.getElementById('flip-btn').addEventListener('click', flipCard);
@@ -416,5 +497,6 @@ document.getElementById('again-btn').addEventListener('click', handleAgain);
 flashcard.addEventListener('click', flipCard);
 
 renderPendingUploadRows();
+renderWordList();
 renderSetList();
 showStatus('');
