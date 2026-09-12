@@ -1,21 +1,21 @@
 # Ukrainian Flashcards
 
-A lightweight mobile-friendly flashcard app for studying Ukrainian vocabulary and phrases. It accepts CSV or JSON uploads, stores each study set locally, and lets you review cards with a sentence example and pronunciation.
+A mobile-friendly flashcard app for studying Ukrainian vocabulary and phrases.
 
-## Features
+## GitHub Pages static version
 
-- Upload a CSV or JSON word list
-- Add a new study set whenever you want
-- Study on mobile with a responsive design
-- Show the phrase or sentence where a word is used
-- Read the flashcard aloud with browser speech synthesis
-- Keep track of each set in a simple JSON file
+This project is built as a static web app so it can be hosted for free on GitHub Pages.
+
+## How it works
+
+- Upload a CSV or JSON file from your desktop.
+- The app parses the file in the browser.
+- The data is stored in the browser with `localStorage`.
+- Updates are made by uploading a new file or by editing the stored data in the browser.
 
 ## Supported file formats
 
 ### CSV
-
-Use headers like:
 
 ```csv
 front,back,phrase,phrase_translation,note
@@ -36,21 +36,18 @@ front,back,phrase,phrase_translation,note
 ]
 ```
 
-## Run locally
+## Deploy to GitHub Pages
 
-```bash
-cd ukrainian-flashcards
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python app.py
-```
+1. Push this repo to GitHub.
+2. Open the repository in GitHub.
+3. Go to Settings → Pages.
+4. Set Source to the main branch and root folder.
+5. Save.
 
-Then open:
+Your site will be available at:
 
-- http://localhost:5001/
+`https://<your-username>.github.io/<repo-name>/`
 
 ## Notes
 
-This project stores sets in `data/sets.json`, so you can add new sets without a database.
-# ukrainian-flashcard
+This is a static version, so it does not have a Python backend or a server-side database. It is designed for a free GitHub Pages setup with desktop upload and local browser storage.
