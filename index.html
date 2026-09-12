@@ -109,7 +109,7 @@
     <div id="update-status" class="status" aria-live="polite"></div>
 
     <script>
-      const APP_VERSION = '20260912-4';
+      const APP_VERSION = '20260912-5';
       const updateButton = document.getElementById('update-button');
       const updateStatus = document.getElementById('update-status');
       let refreshTimer = null;
@@ -151,18 +151,27 @@
 
       checkRemoteVersion();
 
-      function hardReloadApp() {
-        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-          navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+      async function hardReloadApp() {
+        setUpdateStatus('Clearing stale app cache...', 'success');
+
+        try {
+          if ('caches' in window) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map((key) => caches.delete(key)));
+          }
+
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(registrations.map((registration) => registration.unregister()));
+          }
+        } catch (error) {
+          // Ignore cache cleanup errors and continue with a direct reload.
         }
 
-        setUpdateStatus('Refreshing app cache...', 'success');
-
-        const cacheKeys = ['ukrainian-flashcards-version'];
-        cacheKeys.forEach((key) => localStorage.removeItem(key));
-
-        const originalUrl = `${window.location.origin}${window.location.pathname}`;
-        window.location.replace(originalUrl);
+        const originalUrl = new URL(window.location.href);
+        originalUrl.search = '';
+        originalUrl.hash = '';
+        window.location.replace(originalUrl.toString());
       }
 
       function promptAppUpdate(registration) {
