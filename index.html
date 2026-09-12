@@ -95,6 +95,7 @@
     <div id="update-status" class="status" aria-live="polite"></div>
 
     <script>
+      const APP_VERSION = '20260912-3';
       const updateButton = document.getElementById('update-button');
       const updateStatus = document.getElementById('update-status');
       let refreshTimer = null;
@@ -104,6 +105,37 @@
         updateStatus.textContent = message;
         updateStatus.className = 'status' + (kind ? ` ${kind}` : '');
       }
+
+      async function checkRemoteVersion() {
+        try {
+          const current = localStorage.getItem('ukrainian-flashcards-version');
+          const response = await fetch(`./version.txt?ts=${Date.now()}`, {
+            cache: 'no-store',
+            headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+          });
+
+          if (!response.ok) return;
+
+          const latest = (await response.text()).trim();
+          if (!latest) return;
+
+          if (current !== latest) {
+            localStorage.setItem('ukrainian-flashcards-version', latest);
+            if (current) {
+              window.location.reload();
+            }
+            return;
+          }
+
+          if (!current) {
+            localStorage.setItem('ukrainian-flashcards-version', latest);
+          }
+        } catch (error) {
+          // Ignore and continue; browser will still use stale HTML until the next refresh.
+        }
+      }
+
+      checkRemoteVersion();
 
       function promptAppUpdate(registration) {
         if (!registration || !registration.waiting) return;
