@@ -19,7 +19,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(180deg, #edf5ff 0%, #f9fbff 100%);
+  background: #edf3ff;
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -29,21 +29,22 @@ body {
 }
 
 .app-shell {
-  max-width: 980px;
+  max-width: 440px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 12px 12px 112px;
 }
 
 .topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 @supports (padding: max(0px)) {
   .app-shell {
-    padding-bottom: calc(48px + env(safe-area-inset-bottom));
+    padding-bottom: calc(112px + env(safe-area-inset-bottom));
   }
 }
 
@@ -65,7 +66,9 @@ h1, h2, h3, p {
 }
 
 h1 {
-  font-size: clamp(2rem, 4vw, 2.7rem);
+  font-size: 1.55rem;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
   margin-bottom: 0;
 }
 
@@ -75,38 +78,49 @@ input {
 }
 
 .tab-bar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  position: fixed;
+  left: 50%;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 20;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  max-width: 980px;
-  margin: 0 auto 18px;
-  padding: 10px 16px 0;
-  background: rgba(244, 247, 251, 0.9);
-  backdrop-filter: blur(8px);
+  gap: 8px;
+  width: min(420px, calc(100% - 18px));
+  margin: 0;
+  padding: 8px;
+  border: 1px solid rgba(36, 71, 246, 0.12);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 32px rgba(20, 33, 61, 0.12);
+  backdrop-filter: blur(12px);
 }
 
 .tab-button {
-  min-height: 46px;
-  background: rgba(255, 255, 255, 0.8);
-  color: var(--muted);
-  border: 1px solid var(--border);
-  box-shadow: 0 6px 18px rgba(20, 33, 61, 0.04);
+  min-height: 54px;
+  background: #f3f6fb;
+  color: #41506f;
+  border: 1px solid transparent;
+  box-shadow: none;
   font-weight: 700;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
 }
 
 .tab-button.active {
-  background: var(--primary);
+  background: #1f5bff;
   color: white;
-  border-color: var(--primary);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 16px rgba(31, 91, 255, 0.22);
 }
 
 .content {
   display: grid;
-  gap: 20px;
-  padding-bottom: 90px;
+  gap: 14px;
+  padding-bottom: 0;
 }
 
 .tab-panel {
@@ -121,8 +135,8 @@ input {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 18px;
-  box-shadow: var(--shadow);
-  padding: 20px;
+  box-shadow: 0 8px 24px rgba(20, 33, 61, 0.06);
+  padding: 14px;
 }
 
 .upload-panel form {
@@ -393,13 +407,13 @@ button.mini {
 .study-actions,
 .study-footer {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 12px;
   margin-top: 18px;
 }
 
 .study-footer {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 @media (max-width: 640px) {
