@@ -273,8 +273,8 @@ function createSetFromSelectedRows() {
   }
 
   const sets = readSets();
-  const name = setNameInput.value.trim() || `Custom set ${sets.length + 1}`;
-  const description = setDescriptionInput.value.trim() || 'Custom vocabulary set';
+  const name = `Custom set ${sets.length + 1}`;
+  const description = 'Custom vocabulary set';
 
   const newSet = {
     id: toId(name),
@@ -311,9 +311,7 @@ async function handleUpload(event) {
 
     pendingUploadRows = cards;
     renderPendingUploadRows();
-    const defaultName = setNameInput.value.trim() || file.name.replace(/\.[^.]+$/, '');
-    setNameInput.value = defaultName;
-    showStatus(`Loaded ${cards.length} rows into your word bank. Pick the rows you want, then create the study set name at the end.`, 'success');
+    showStatus(`Loaded ${cards.length} rows into your word bank. Pick the rows you want and create a flashcard set from them.`, 'success');
   } catch (error) {
     pendingUploadRows = [];
     renderPendingUploadRows();
