@@ -8,11 +8,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Ukrainian Flashcards" />
     <title>Ukrainian Flashcards</title>
-    <link rel="manifest" href="./manifest.webmanifest?v=20260912-1" />
-    <link rel="icon" href="./icon-192.png?v=20260912-1" type="image/png" sizes="192x192" />
-    <link rel="apple-touch-icon" href="./icon-192.png?v=20260912-1" sizes="192x192" type="image/png" />
-    <link rel="apple-touch-icon" href="./icon-512.png?v=20260912-1" sizes="512x512" type="image/png" />
-    <link rel="stylesheet" href="./style.css?v=20260912-1" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="./icon-192.png" sizes="192x192" type="image/png" />
+    <link rel="apple-touch-icon" href="./icon-512.png" sizes="512x512" type="image/png" />
+    <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <div class="app-shell">
@@ -161,9 +161,8 @@
         const cacheKeys = ['ukrainian-flashcards-version'];
         cacheKeys.forEach((key) => localStorage.removeItem(key));
 
-        const noCacheUrl = new URL(window.location.href);
-        noCacheUrl.searchParams.set('v', Date.now().toString());
-        window.location.replace(noCacheUrl.toString());
+        const originalUrl = `${window.location.origin}${window.location.pathname}`;
+        window.location.replace(originalUrl);
       }
 
       function promptAppUpdate(registration) {
@@ -177,7 +176,7 @@
         if (!('serviceWorker' in navigator)) return;
 
         try {
-          const registration = await navigator.serviceWorker.register('./sw.js?v=20260912-1', { updateViaCache: 'none' });
+          const registration = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
 
           registration.addEventListener('updatefound', () => {
             const installingWorker = registration.installing;
@@ -260,6 +259,6 @@
         });
       }
     </script>
-    <script src="./app.js?v=20260912-1"></script>
+    <script src="./app.js"></script>
   </body>
 </html>
