@@ -53,3 +53,4 @@ Then open:
 ## Notes
 
 This project stores sets in `data/sets.json`, so you can add new sets without a database.
+# ukrainian-flashcard
