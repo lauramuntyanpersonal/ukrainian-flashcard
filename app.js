@@ -39,6 +39,7 @@ const usernameStatus = document.getElementById('username-status');
 const usernameModal = document.getElementById('username-modal');
 const startUsernameInput = document.getElementById('start-username-input');
 const startSaveUsernameButton = document.getElementById('start-save-username-button');
+const accountButton = document.getElementById('account-button');
 
 const frontText = document.getElementById('front-text');
 const backText = document.getElementById('back-text');
@@ -479,9 +480,17 @@ function parseUploadedFile(file) {
 
 function updateUsernameStatus() {
   const username = getCurrentUsername();
+  const displayName = username === 'default' ? 'Account' : username;
+
   if (usernameInput) {
     usernameInput.value = username === 'default' ? '' : username;
   }
+
+  if (accountButton) {
+    accountButton.textContent = displayName;
+    accountButton.title = hasUsername() ? `Account: ${username}` : 'Set account';
+  }
+
   if (usernameStatus) {
     usernameStatus.textContent = hasUsername() ? `Current user: ${username}` : 'Current user: not set';
   }
@@ -1029,6 +1038,21 @@ async function saveCurrentUsername(rawValue) {
 if (saveUsernameButton) {
   saveUsernameButton.addEventListener('click', async () => {
     await saveCurrentUsername(usernameInput ? usernameInput.value : '');
+  });
+}
+
+if (accountButton) {
+  accountButton.addEventListener('click', () => {
+    if (usernameModal) {
+      const username = getCurrentUsername();
+      if (startUsernameInput) {
+        startUsernameInput.value = username === 'default' ? '' : username;
+      }
+      usernameModal.classList.remove('hidden');
+      if (startUsernameInput) {
+        startUsernameInput.focus();
+      }
+    }
   });
 }
 

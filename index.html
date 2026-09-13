@@ -34,7 +34,10 @@
           <p class="eyebrow">Language study</p>
           <h1>Ukrainian flashcards</h1>
         </div>
-        <button id="update-button" class="ghost mini" type="button">Update app</button>
+        <div class="header-actions">
+          <button id="account-button" class="ghost mini account-button" type="button">Account</button>
+          <button id="update-button" class="ghost mini" type="button">Update app</button>
+        </div>
       </header>
 
       <nav class="tab-bar" aria-label="Primary navigation">
@@ -73,16 +76,6 @@
 
         <section class="panel upload-panel tab-panel" data-panel="upload">
           <h2>Upload a new word set</h2>
-          <div class="username-box">
-            <label for="username-input">
-              <span>Username</span>
-            </label>
-            <div class="username-row">
-              <input id="username-input" type="text" maxlength="24" placeholder="Enter your username" />
-              <button id="save-username-button" class="ghost mini" type="button">Save</button>
-            </div>
-            <p id="username-status" class="helper-text compact">Current user: default</p>
-          </div>
           <form id="upload-form">
             <p class="helper-text">Upload your full CSV or JSON as a raw word bank. You can choose the rows you want and make flashcards later.</p>
             <label class="file-picker">
