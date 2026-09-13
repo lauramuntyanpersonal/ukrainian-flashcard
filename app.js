@@ -70,6 +70,33 @@ function getCurrentUsername() {
   return safeUsername;
 }
 
+function removeLegacyDemoSetsFromStorage() {
+  const seenKeys = Object.keys(localStorage);
+
+  seenKeys.forEach((key) => {
+    if (!key.startsWith('ukrainian-flashcards-sets-v1:')) return;
+
+    try {
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(parsed)) return;
+
+      const cleaned = parsed.filter((set) => {
+        if (!set || typeof set !== 'object') return true;
+        const name = String(set.name || '').trim().toLowerCase();
+        const id = String(set.id || '').trim().toLowerCase();
+        return name !== 'daily ukrainian' && name !== 'daily-ukrainian' && id !== 'daily-ukrainian' && id !== 'demo-ukrainian';
+      });
+
+      if (cleaned.length !== parsed.length) {
+        localStorage.setItem(key, JSON.stringify(cleaned));
+      }
+    } catch (error) {
+      // Ignore malformed legacy storage entries.
+    }
+  });
+}
+
 function setCurrentUsername(username) {
   const safeUsername = String(username || '').trim().replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-_]/g, '');
   const finalUsername = safeUsername || 'default';
@@ -1062,6 +1089,7 @@ document.addEventListener('pointerup', () => {
   isDraggingWordSelection = false;
 });
 
+removeLegacyDemoSetsFromStorage();
 updateUsernameStatus();
 ensureUsernamePrompt();
 if (getCloudConfig()) {
