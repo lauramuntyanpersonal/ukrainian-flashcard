@@ -69,6 +69,7 @@ let pendingUploadRows = [];
 let selectedWordIndexes = new Set();
 let isDraggingWordSelection = false;
 let draggingSelectionMode = true;
+let activeAudio = null;
 
 function toId(value) {
   return `${value.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-` + Date.now().toString(36);
@@ -1228,18 +1229,104 @@ function goNext() {
   renderCurrentCard();
 }
 
-function speakText(text) {
+function getBestSpeechVoice(language = 'uk-UA') {
+  if (!('speechSynthesis' in window)) return null;
+
+  const preferredLanguage = String(language).toLowerCase();
+  const voices = window.speechSynthesis.getVoices();
+  const matchParts = {
+    'uk-ua': ['ukrainian', 'uk', 'ukraine'],
+    'en-us': ['english', 'united states', 'us english', 'american english'],
+    'en-gb': ['english', 'british', 'united kingdom', 'uk english'],
+    'en': ['english'],
+  };
+
+  const preferred = matchParts[preferredLanguage] || matchParts[preferredLanguage.split('-')[0]] || ['english'];
+
+  let bestMatch = null;
+  for (const candidate of preferred) {
+    const voice = voices.find((item) => {
+      const name = (item.name || '').toLowerCase();
+      const lang = (item.lang || '').toLowerCase();
+      return name.includes(candidate) || lang.includes(candidate);
+    });
+    if (voice) {
+      bestMatch = voice;
+      break;
+    }
+  }
+
+  return bestMatch || voices.find((voice) => (voice.lang || '').toLowerCase().startsWith(preferredLanguage)) || voices[0] || null;
+}
+
+function fallbackSpeechText(text, language = 'uk-UA') {
   if (!text || !('speechSynthesis' in window)) return;
+
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'uk-UA';
+  utterance.lang = language;
+  utterance.rate = 0.96;
+  utterance.pitch = 1;
+  utterance.volume = 1;
+  const voice = getBestSpeechVoice(language);
+  if (voice) utterance.voice = voice;
+
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utterance);
+}
+
+function playGoogleTranslateAudio(text, language = 'uk-UA') {
+  if (!text) return;
+
+  const cleanText = String(text).trim();
+  if (!cleanText) return;
+
+  if (activeAudio) {
+    activeAudio.pause();
+    activeAudio.currentTime = 0;
+  }
+
+  const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q=${encodeURIComponent(cleanText)}&tl=${language === 'uk-UA' ? 'uk' : 'en'}&total=1&idx=0&textlen=${cleanText.length}`;
+
+  const audio = new Audio(googleUrl);
+  activeAudio = audio;
+  audio.volume = 1;
+  audio.play().catch(() => {
+    fallbackSpeechText(cleanText, language);
+    activeAudio = null;
+  });
+}
+
+function speakText(text, language = 'uk-UA') {
+  if (!text) return;
+
+  const cleanText = String(text).trim();
+  if (!cleanText) return;
+
+  if ('speechSynthesis' in window) {
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length) {
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = language;
+      utterance.rate = 0.96;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      const voice = getBestSpeechVoice(language);
+      if (voice) utterance.voice = voice;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+      return;
+    }
+  }
+
+  playGoogleTranslateAudio(cleanText, language);
 }
 
 function handleSpeak() {
   const card = currentCards[currentIndex];
   if (!card) return;
-  speakText(flipped ? card.back : card.front);
+  const activeText = flipped ? card.back : card.front;
+  const language = flipped ? 'en-US' : 'uk-UA';
+  speakText(activeText, language);
 }
 
 function deleteCurrentCard() {
