@@ -31,6 +31,7 @@ const backButton = document.getElementById('back-button');
 const navBackButton = document.getElementById('nav-back-button');
 const deleteCardButton = document.getElementById('delete-card-btn');
 const beginStudyButton = document.getElementById('begin-study-btn');
+const contextGameStartButton = document.getElementById('context-game-start-btn');
 const studySetHeaderButton = document.getElementById('study-set-header-button');
 const setReviewList = document.getElementById('set-review-list');
 const contextGame = document.getElementById('context-game');
@@ -1154,6 +1155,7 @@ function showMainView() {
   if (accountButton) accountButton.classList.remove('hidden');
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
+  if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
   if (studyHeaderCopy) studyHeaderCopy.classList.remove('hidden');
@@ -1200,11 +1202,13 @@ function showStudyOptions() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.remove('hidden');
+  if (contextGameStartButton) contextGameStartButton.classList.remove('hidden');
 }
 
 function beginStudySession() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
+  if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (studyHeaderCopy) studyHeaderCopy.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
@@ -1498,7 +1502,11 @@ if (deleteCardButton) {
 }
 
 if (beginStudyButton) {
-  beginStudyButton.addEventListener('click', startContextWritingGame);
+  beginStudyButton.addEventListener('click', beginStudySession);
+}
+
+if (contextGameStartButton) {
+  contextGameStartButton.addEventListener('click', startContextWritingGame);
 }
 
 if (contextGame) {
