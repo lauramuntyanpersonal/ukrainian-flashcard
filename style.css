@@ -426,6 +426,16 @@ button.mini {
   margin-bottom: 16px;
 }
 
+.add-word-form {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #f8faff;
+}
+
 .words-list,
 .set-list {
   display: grid;

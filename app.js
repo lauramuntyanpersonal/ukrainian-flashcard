@@ -32,6 +32,10 @@ const studyFooter = document.querySelector('.study-footer');
 const tabButtons = document.querySelectorAll('.tab-button');
 const tabPanels = document.querySelectorAll('.tab-panel');
 const refreshWordsButton = document.getElementById('refresh-words-button');
+const addWordForm = document.getElementById('add-word-form');
+const addWordFrontInput = document.getElementById('add-word-front');
+const addWordBackInput = document.getElementById('add-word-back');
+const addWordPhraseInput = document.getElementById('add-word-phrase');
 const tabBar = document.querySelector('.tab-bar');
 const usernameInput = document.getElementById('username-input');
 const saveUsernameButton = document.getElementById('save-username-button');
@@ -1059,6 +1063,34 @@ refreshWordsButton.addEventListener('click', () => {
   renderWordList();
   showStatus('Word list refreshed.', 'success');
 });
+
+if (addWordForm) {
+  addWordForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const front = (addWordFrontInput ? addWordFrontInput.value : '').trim();
+    const back = (addWordBackInput ? addWordBackInput.value : '').trim();
+    const phrase = (addWordPhraseInput ? addWordPhraseInput.value : '').trim();
+
+    if (!front || !back) {
+      showStatus('Please enter both a word and its meaning.', 'error');
+      return;
+    }
+
+    const nextWords = mergeUniqueWordEntries(readWordBank(), [{
+      id: `manual-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      front,
+      back,
+      phrase,
+      note: '',
+    }]);
+
+    saveWordBank(nextWords);
+    renderWordList();
+    addWordForm.reset();
+    showStatus('Word added.', 'success');
+  });
+}
 
 if (deleteCardButton) {
   deleteCardButton.addEventListener('click', deleteCurrentCard);

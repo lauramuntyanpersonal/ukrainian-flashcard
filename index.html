@@ -52,6 +52,23 @@
             <h2>All words</h2>
             <button id="refresh-words-button" class="ghost mini" type="button">Refresh</button>
           </div>
+
+          <form id="add-word-form" class="add-word-form">
+            <label>
+              <span>Word</span>
+              <input id="add-word-front" type="text" maxlength="80" placeholder="e.g. привіт" required />
+            </label>
+            <label>
+              <span>Meaning</span>
+              <input id="add-word-back" type="text" maxlength="120" placeholder="e.g. hello" required />
+            </label>
+            <label>
+              <span>Context sentence (optional)</span>
+              <input id="add-word-phrase" type="text" maxlength="200" placeholder="e.g. Привіт, як справи?" />
+            </label>
+            <button type="submit">Add word</button>
+          </form>
+
           <div id="words-list" class="words-list"></div>
         </section>
 
