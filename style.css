@@ -770,6 +770,10 @@ button.mini {
   margin: 0 auto;
   padding-top: max(12px, env(safe-area-inset-top));
   padding-bottom: 0;
+  border: 0;
+  border-radius: 0;
+  background: #edf3ff;
+  box-shadow: none;
   overflow: hidden;
   overscroll-behavior: none;
 }
