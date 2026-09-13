@@ -1182,11 +1182,17 @@ function showSetReviewMode() {
     setReviewList.classList.remove('hidden');
     renderSetReviewList();
   }
-  if (beginStudyButton) beginStudyButton.classList.remove('hidden');
+  if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.remove('hidden');
   if (flashcard) flashcard.classList.add('hidden');
   if (studyActions) studyActions.classList.add('hidden');
   if (studyFooter) studyFooter.classList.add('hidden');
+}
+
+function showStudyOptions() {
+  if (setReviewList) setReviewList.classList.add('hidden');
+  if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
+  if (beginStudyButton) beginStudyButton.classList.remove('hidden');
 }
 
 function beginStudySession() {
@@ -1452,7 +1458,7 @@ if (beginStudyButton) {
 }
 
 if (studySetHeaderButton) {
-  studySetHeaderButton.addEventListener('click', beginStudySession);
+  studySetHeaderButton.addEventListener('click', showStudyOptions);
 }
 
 function setActiveTab(selectedTab) {
