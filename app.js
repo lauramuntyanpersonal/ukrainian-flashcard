@@ -21,6 +21,7 @@ const chunkSetCheckbox = document.getElementById('chunk-set-checkbox');
 const chunkSizeRow = document.getElementById('chunk-size-row');
 const setSizeInput = document.getElementById('set-size-input');
 const createSetFromWordBankButton = document.getElementById('create-set-from-word-bank');
+const closeSetBuilderButton = document.getElementById('close-set-builder');
 const app = document.getElementById('app');
 const studyPanel = document.getElementById('study-panel');
 const flashcard = document.getElementById('flashcard');
@@ -978,6 +979,15 @@ function createChunkedSetsFromWordBank() {
   showStatus(`Created ${builtSets.length} set${builtSets.length === 1 ? '' : 's'} from ${eligibleWords.length} unassigned words.`, 'success');
 }
 
+function resetSetBuilderState() {
+  selectedWordIndexes.clear();
+  if (setNameInput) setNameInput.value = '';
+  if (chunkSetCheckbox) chunkSetCheckbox.checked = false;
+  if (setSizeInput) setSizeInput.value = '50';
+  if (setBuilderList) renderSetBuilderList();
+  updateSetBuilderMode();
+}
+
 function toggleSetBuilder() {
   if (!setBuilder) return;
   const isHidden = setBuilder.classList.toggle('hidden');
@@ -988,6 +998,9 @@ function toggleSetBuilder() {
     renderSetBuilderList();
   }
   updateSetBuilderMode();
+  if (isHidden) {
+    resetSetBuilderState();
+  }
 }
 
 function showStatus(message, kind = '') {
@@ -1439,6 +1452,17 @@ if (addSetButton) {
 
 if (createSetFromWordBankButton) {
   createSetFromWordBankButton.addEventListener('click', createSetFromWordBank);
+}
+
+if (closeSetBuilderButton) {
+  closeSetBuilderButton.addEventListener('click', () => {
+    if (!setBuilder) return;
+    setBuilder.classList.add('hidden');
+    resetSetBuilderState();
+    if (addSetButton) {
+      addSetButton.textContent = 'Add set';
+    }
+  });
 }
 
 if (chunkSetCheckbox) {
