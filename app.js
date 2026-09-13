@@ -38,6 +38,7 @@ const tabPanels = document.querySelectorAll('.tab-panel');
 const refreshWordsButton = document.getElementById('refresh-words-button');
 const wordCountLabel = document.getElementById('word-count');
 const wordSortSelect = document.getElementById('word-sort-select');
+const setSortSelect = document.getElementById('set-sort-select');
 const toggleAddWordFormButton = document.getElementById('toggle-add-word-form');
 const addWordForm = document.getElementById('add-word-form');
 const addWordFrontInput = document.getElementById('add-word-front');
@@ -524,6 +525,16 @@ function setWordSortPreference(sortOrder) {
   localStorage.setItem('ukrainian-flashcards-word-sort-v1', safeOrder);
 }
 
+function getSetSortPreference() {
+  const stored = localStorage.getItem('ukrainian-flashcards-set-sort-v1');
+  return stored === 'oldest' ? 'oldest' : 'newest';
+}
+
+function setSetSortPreference(sortOrder) {
+  const safeOrder = sortOrder === 'oldest' ? 'oldest' : 'newest';
+  localStorage.setItem('ukrainian-flashcards-set-sort-v1', safeOrder);
+}
+
 function renderWordList() {
   const words = readWordBank();
   const sortOrder = getWordSortPreference();
@@ -710,12 +721,19 @@ function renameSetById(setId, nextName) {
 
 function renderSetList() {
   const sets = readSets();
-  if (!sets.length) {
+  const sortOrder = getSetSortPreference();
+  const orderedSets = sortOrder === 'oldest' ? [...sets].reverse() : [...sets];
+
+  if (setSortSelect) {
+    setSortSelect.value = sortOrder;
+  }
+
+  if (!orderedSets.length) {
     setList.innerHTML = '<p class="empty-state">No sets yet. Create one from your word bank.</p>';
     return;
   }
 
-  setList.innerHTML = sets
+  setList.innerHTML = orderedSets
     .map((set) => `
       <div class="set-item" data-set-id="${set.id}">
         <button type="button" class="set-delete-action" data-set-id="${set.id}" aria-label="Delete set ${set.name}">Delete</button>
@@ -885,7 +903,7 @@ function chunkWords(items, chunkSize) {
   const safeChunkSize = Number.isFinite(chunkSize) && chunkSize > 0 ? Math.floor(chunkSize) : 50;
   const chunks = [];
 
-  for (let index = 0; index < items.length; index += safeChunkSize) {
+  for (let index = 0; index + safeChunkSize <= items.length; index += safeChunkSize) {
     chunks.push(items.slice(index, index + safeChunkSize));
   }
 
@@ -957,6 +975,11 @@ function createChunkedSetsFromWordBank() {
   const chunkSize = Number.isFinite(chunkSizeValue) && chunkSizeValue > 0 ? Math.min(500, Math.floor(chunkSizeValue)) : 50;
   const baseName = (setNameInput ? setNameInput.value.trim() : '').replace(/\s+/g, ' ') || 'Chunked set';
   const chunks = chunkWords(eligibleWords, chunkSize);
+
+  if (!chunks.length) {
+    showStatus(`Not enough words for a full ${chunkSize}-word chunk. The remaining words stay unassigned.`, 'error');
+    return;
+  }
 
   const builtSets = chunks.map((chunk, index) => ({
     id: toId(`${baseName} ${index + 1}`),
@@ -1269,6 +1292,14 @@ if (wordSortSelect) {
     const nextSort = event.target.value === 'oldest' ? 'oldest' : 'newest';
     setWordSortPreference(nextSort);
     renderWordList();
+  });
+}
+
+if (setSortSelect) {
+  setSortSelect.addEventListener('change', (event) => {
+    const nextSort = event.target.value === 'oldest' ? 'oldest' : 'newest';
+    setSetSortPreference(nextSort);
+    renderSetList();
   });
 }
 
