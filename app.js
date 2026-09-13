@@ -1159,6 +1159,7 @@ function openSet(setId) {
 function showMainView() {
   studyPanel.classList.add('hidden');
   studyPanel.classList.remove('context-writing-active');
+  studyPanel.classList.remove('keyboard-visible');
   app.classList.remove('hidden');
   if (accountButton) accountButton.classList.remove('hidden');
   if (appUpdateButton) appUpdateButton.classList.remove('hidden');
@@ -1217,6 +1218,7 @@ function showStudyOptions() {
 
 function beginStudySession() {
   studyPanel.classList.remove('context-writing-active');
+  studyPanel.classList.remove('keyboard-visible');
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
@@ -1248,6 +1250,7 @@ function renderContextGameCard() {
 function startContextWritingGame() {
   if (!currentCards.length) return;
   studyPanel.classList.add('context-writing-active');
+  studyPanel.classList.remove('keyboard-visible');
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
@@ -1258,6 +1261,14 @@ function startContextWritingGame() {
   if (contextGame) contextGame.classList.remove('hidden');
   currentIndex = 0;
   renderContextGameCard();
+}
+
+function updateContextKeyboardLayout() {
+  if (!studyPanel.classList.contains('context-writing-active')) return;
+
+  const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  const keyboardVisible = window.innerHeight - viewportHeight > 120;
+  studyPanel.classList.toggle('keyboard-visible', keyboardVisible);
 }
 
 function advanceContextGame() {
@@ -1549,6 +1560,17 @@ if (contextGameAnswer) {
       checkContextAnswer();
     }
   });
+
+  contextGameAnswer.addEventListener('focus', updateContextKeyboardLayout);
+  contextGameAnswer.addEventListener('blur', () => {
+    if (!window.visualViewport) {
+      studyPanel.classList.remove('keyboard-visible');
+    }
+  });
+}
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', updateContextKeyboardLayout);
 }
 
 if (contextGameNext) {
@@ -1593,6 +1615,7 @@ function showHomeScreen() {
   app.classList.remove('hidden');
   studyPanel.classList.add('hidden');
   studyPanel.classList.remove('context-writing-active');
+  studyPanel.classList.remove('keyboard-visible');
   if (accountButton) accountButton.classList.remove('hidden');
   if (appUpdateButton) appUpdateButton.classList.remove('hidden');
   if (studySettingsMenu) studySettingsMenu.classList.add('hidden');

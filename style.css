@@ -813,6 +813,10 @@ button.mini {
 }
 
 .study-panel.context-writing-active .context-game {
+  margin-bottom: auto;
+}
+
+.study-panel.context-writing-active.keyboard-visible .context-game {
   margin-bottom: 0;
 }
 
