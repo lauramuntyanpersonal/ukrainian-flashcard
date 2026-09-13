@@ -521,7 +521,7 @@ function renderSetList() {
   setList.innerHTML = sets
     .map((set) => `
       <div class="set-item" data-set-id="${set.id}">
-        <div class="set-delete-action" data-set-id="${set.id}">Delete</div>
+        <button type="button" class="set-delete-action" data-set-id="${set.id}" aria-label="Delete set ${set.name}">Delete</button>
         <button type="button" class="set-item-main" data-set-id="${set.id}">
           <div class="set-item-copy">
             <strong>${set.name}</strong>
