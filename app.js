@@ -53,6 +53,7 @@ const usernameModal = document.getElementById('username-modal');
 const startUsernameInput = document.getElementById('start-username-input');
 const startSaveUsernameButton = document.getElementById('start-save-username-button');
 const accountButton = document.getElementById('account-button');
+const updateButton = document.getElementById('update-button');
 
 const frontText = document.getElementById('front-text');
 const backText = document.getElementById('back-text');
@@ -1130,6 +1131,7 @@ function openSet(setId) {
   currentCards = set.cards || [];
   app.classList.add('hidden');
   studyPanel.classList.remove('hidden');
+  if (accountButton) accountButton.classList.add('hidden');
   if (tabBar) {
     tabBar.classList.add('hidden');
   }
@@ -1143,6 +1145,7 @@ function openSet(setId) {
 function showMainView() {
   studyPanel.classList.add('hidden');
   app.classList.remove('hidden');
+  if (accountButton) accountButton.classList.remove('hidden');
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
@@ -1458,6 +1461,7 @@ function setActiveTab(selectedTab) {
 function showHomeScreen() {
   app.classList.remove('hidden');
   studyPanel.classList.add('hidden');
+  if (accountButton) accountButton.classList.remove('hidden');
   if (tabBar) {
     tabBar.classList.remove('hidden');
   }
