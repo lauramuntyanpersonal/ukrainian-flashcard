@@ -2,31 +2,7 @@ const STORAGE_KEY = 'ukrainian-flashcards-sets-v1';
 const WORD_BANK_KEY = 'ukrainian-flashcards-word-bank-v1';
 const USERNAME_KEY = 'ukrainian-flashcards-username-v1';
 
-const demoSets = [
-  {
-    id: 'demo-ukrainian',
-    name: 'Daily Ukrainian',
-    description: 'Starter phrases for everyday use.',
-    cards: [
-      {
-        id: 'card-1',
-        front: 'привіт',
-        back: 'hello',
-        phrase: 'Привіт! Як справи?',
-        phrase_translation: 'Hi! How are you?',
-        note: 'Common greeting',
-      },
-      {
-        id: 'card-2',
-        front: 'дякую',
-        back: 'thank you',
-        phrase: 'Дякую за допомогу.',
-        phrase_translation: 'Thank you for your help.',
-        note: 'Polite phrase',
-      },
-    ],
-  },
-];
+const demoSets = [];
 
 const uploadForm = document.getElementById('upload-form');
 const fileInput = document.getElementById('file-input');
