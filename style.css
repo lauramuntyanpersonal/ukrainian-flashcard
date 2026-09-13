@@ -93,6 +93,38 @@ body {
   margin-bottom: 12px;
 }
 
+.study-panel > .topbar.compact {
+  position: relative;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.study-header-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.study-settings-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 5;
+  min-width: 150px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.study-settings-menu.hidden {
+  display: none;
+}
+
 .eyebrow {
   margin: 0 0 4px;
   font-size: 12px;
@@ -753,7 +785,7 @@ button.mini {
 
 .context-game {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   margin-top: auto;
   padding: 18px;
   border: 1px solid var(--border);
@@ -766,6 +798,10 @@ button.mini {
   margin-bottom: 0;
   display: flex;
   align-items: center;
+}
+
+.context-game label[for="context-game-answer"] {
+  margin-top: 0;
 }
 
 .context-game.hidden {

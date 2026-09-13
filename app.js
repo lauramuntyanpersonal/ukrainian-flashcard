@@ -33,6 +33,9 @@ const deleteCardButton = document.getElementById('delete-card-btn');
 const beginStudyButton = document.getElementById('begin-study-btn');
 const contextGameStartButton = document.getElementById('context-game-start-btn');
 const studySetHeaderButton = document.getElementById('study-set-header-button');
+const studySettingsButton = document.getElementById('study-settings-button');
+const studySettingsMenu = document.getElementById('study-settings-menu');
+const shuffleCardsButton = document.getElementById('shuffle-cards-button');
 const setReviewList = document.getElementById('set-review-list');
 const contextGame = document.getElementById('context-game');
 const contextGameMeaning = document.getElementById('context-game-meaning');
@@ -61,6 +64,7 @@ const usernameModal = document.getElementById('username-modal');
 const startUsernameInput = document.getElementById('start-username-input');
 const startSaveUsernameButton = document.getElementById('start-save-username-button');
 const accountButton = document.getElementById('account-button');
+const appUpdateButton = document.getElementById('update-button');
 
 const frontText = document.getElementById('front-text');
 const backText = document.getElementById('back-text');
@@ -1139,6 +1143,7 @@ function openSet(setId) {
   app.classList.add('hidden');
   studyPanel.classList.remove('hidden');
   if (accountButton) accountButton.classList.add('hidden');
+  if (appUpdateButton) appUpdateButton.classList.add('hidden');
   if (tabBar) {
     tabBar.classList.add('hidden');
   }
@@ -1154,6 +1159,8 @@ function showMainView() {
   studyPanel.classList.add('hidden');
   app.classList.remove('hidden');
   if (accountButton) accountButton.classList.remove('hidden');
+  if (appUpdateButton) appUpdateButton.classList.remove('hidden');
+  if (studySettingsMenu) studySettingsMenu.classList.add('hidden');
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
@@ -1534,6 +1541,29 @@ if (studySetHeaderButton) {
   studySetHeaderButton.addEventListener('click', showStudyOptions);
 }
 
+if (studySettingsButton && studySettingsMenu) {
+  studySettingsButton.addEventListener('click', () => {
+    studySettingsMenu.classList.toggle('hidden');
+  });
+}
+
+if (shuffleCardsButton) {
+  shuffleCardsButton.addEventListener('click', () => {
+    for (let index = currentCards.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [currentCards[index], currentCards[randomIndex]] = [currentCards[randomIndex], currentCards[index]];
+    }
+    currentIndex = 0;
+    flipped = false;
+    if (studySettingsMenu) studySettingsMenu.classList.add('hidden');
+    if (contextGame && !contextGame.classList.contains('hidden')) {
+      renderContextGameCard();
+    } else {
+      renderCurrentCard();
+    }
+  });
+}
+
 function setActiveTab(selectedTab) {
   tabButtons.forEach((tab) => tab.classList.toggle('active', tab.dataset.tab === selectedTab));
   tabPanels.forEach((panel) => {
@@ -1545,6 +1575,8 @@ function showHomeScreen() {
   app.classList.remove('hidden');
   studyPanel.classList.add('hidden');
   if (accountButton) accountButton.classList.remove('hidden');
+  if (appUpdateButton) appUpdateButton.classList.remove('hidden');
+  if (studySettingsMenu) studySettingsMenu.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
   if (tabBar) {
     tabBar.classList.remove('hidden');
