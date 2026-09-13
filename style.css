@@ -429,11 +429,15 @@ button.mini {
 .add-word-form {
   display: grid;
   gap: 12px;
-  margin-bottom: 18px;
+  margin: 12px 0 18px;
   padding: 12px;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: #f8faff;
+}
+
+.add-word-form.hidden {
+  display: none;
 }
 
 .words-list,
@@ -488,6 +492,7 @@ button.mini {
   z-index: 1;
   display: grid;
   gap: 6px;
+  width: 100%;
   padding-right: 8px;
   background: var(--panel-alt);
   transform: translateX(0);

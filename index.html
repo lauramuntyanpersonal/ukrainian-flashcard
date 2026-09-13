@@ -53,7 +53,9 @@
             <button id="refresh-words-button" class="ghost mini" type="button">Refresh</button>
           </div>
 
-          <form id="add-word-form" class="add-word-form">
+          <button id="toggle-add-word-form" class="ghost" type="button">Add word</button>
+
+          <form id="add-word-form" class="add-word-form hidden">
             <label>
               <span>Word</span>
               <input id="add-word-front" type="text" maxlength="80" placeholder="e.g. привіт" required inputmode="text" lang="uk" autocapitalize="none" autocorrect="off" />
@@ -66,7 +68,7 @@
               <span>Context sentence (optional)</span>
               <input id="add-word-phrase" type="text" maxlength="200" placeholder="e.g. Привіт, як справи?" inputmode="text" lang="uk" autocapitalize="sentences" autocorrect="off" />
             </label>
-            <button type="submit">Add word</button>
+            <button type="submit">Save word</button>
           </form>
 
           <div id="words-list" class="words-list"></div>

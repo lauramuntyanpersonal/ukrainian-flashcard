@@ -32,6 +32,7 @@ const studyFooter = document.querySelector('.study-footer');
 const tabButtons = document.querySelectorAll('.tab-button');
 const tabPanels = document.querySelectorAll('.tab-panel');
 const refreshWordsButton = document.getElementById('refresh-words-button');
+const toggleAddWordFormButton = document.getElementById('toggle-add-word-form');
 const addWordForm = document.getElementById('add-word-form');
 const addWordFrontInput = document.getElementById('add-word-front');
 const addWordBackInput = document.getElementById('add-word-back');
@@ -1069,6 +1070,16 @@ refreshWordsButton.addEventListener('click', () => {
   showStatus('Word list refreshed.', 'success');
 });
 
+if (toggleAddWordFormButton && addWordForm) {
+  toggleAddWordFormButton.addEventListener('click', () => {
+    const isHidden = addWordForm.classList.toggle('hidden');
+    toggleAddWordFormButton.textContent = isHidden ? 'Add word' : 'Close';
+    if (!isHidden && addWordFrontInput) {
+      addWordFrontInput.focus();
+    }
+  });
+}
+
 if (addWordForm) {
   addWordForm.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -1093,6 +1104,8 @@ if (addWordForm) {
     saveWordBank(nextWords);
     renderWordList();
     addWordForm.reset();
+    addWordForm.classList.add('hidden');
+    toggleAddWordFormButton.textContent = 'Add word';
     showStatus('Word added.', 'success');
   });
 }
