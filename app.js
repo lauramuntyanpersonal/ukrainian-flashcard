@@ -496,6 +496,13 @@ function updateUsernameStatus() {
   }
 }
 
+function deleteWordByIndex(index) {
+  const nextWords = readWordBank().filter((_, wordIndex) => wordIndex !== index);
+  saveWordBank(nextWords);
+  renderWordList();
+  showStatus('Word deleted.', 'success');
+}
+
 function renderWordList() {
   const words = readWordBank();
   if (!words.length) {
@@ -506,7 +513,8 @@ function renderWordList() {
   wordsList.innerHTML = words
     .map((word, index) => `
       <div class="word-row" data-word-index="${index}">
-        <div class="word-main">
+        <button type="button" class="word-delete-action" data-word-index="${index}" aria-label="Delete word ${word.front || 'word'}">Delete</button>
+        <div class="word-main" data-word-index="${index}">
           <strong>${word.front || 'Untitled word'}</strong>
           <span>${word.back || word.phrase || word.note || 'No definition yet'}</span>
         </div>
@@ -514,6 +522,85 @@ function renderWordList() {
       </div>
     `)
     .join('');
+
+  wordsList.querySelectorAll('.word-delete-action').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      deleteWordByIndex(Number(button.dataset.wordIndex));
+    });
+  });
+
+  wordsList.querySelectorAll('.word-row').forEach((row) => {
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+    const maxOffset = 96;
+
+    const applyOffset = (offset) => {
+      const clamped = Math.max(-maxOffset, Math.min(0, offset));
+      row.querySelector('.word-main').style.transform = `translateX(${clamped}px)`;
+    };
+
+    const resetSwipe = () => {
+      row.classList.remove('is-swiped');
+      applyOffset(0);
+      isDragging = false;
+    };
+
+    row.addEventListener('pointerdown', (event) => {
+      startX = event.clientX;
+      currentX = event.clientX;
+      isDragging = true;
+      row.setPointerCapture(event.pointerId);
+    });
+
+    row.addEventListener('pointermove', (event) => {
+      if (!isDragging) return;
+      const delta = event.clientX - startX;
+      currentX = event.clientX;
+      const isAlreadySwiped = row.classList.contains('is-swiped');
+
+      if (delta < 0) {
+        const offset = Math.max(delta, -maxOffset);
+        applyOffset(isAlreadySwiped ? Math.min(offset, 0) : offset);
+      } else if (isAlreadySwiped) {
+        const offset = Math.min(delta, 0);
+        applyOffset(offset);
+      }
+    });
+
+    row.addEventListener('pointerup', () => {
+      if (!isDragging) return;
+      const delta = currentX - startX;
+      if (delta <= -52) {
+        row.classList.add('is-swiped');
+        applyOffset(-maxOffset);
+      } else if (delta >= 48 && row.classList.contains('is-swiped')) {
+        resetSwipe();
+      } else {
+        if (row.classList.contains('is-swiped')) {
+          applyOffset(-maxOffset);
+        } else {
+          resetSwipe();
+        }
+      }
+      isDragging = false;
+    });
+
+    row.addEventListener('pointerleave', () => {
+      if (!isDragging) return;
+      const delta = currentX - startX;
+      if (delta <= -52) {
+        row.classList.add('is-swiped');
+        applyOffset(-maxOffset);
+      } else {
+        resetSwipe();
+      }
+      isDragging = false;
+    });
+
+    row.addEventListener('pointercancel', resetSwipe);
+  });
 }
 
 function deleteSetById(setId) {
