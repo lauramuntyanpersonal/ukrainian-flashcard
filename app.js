@@ -838,6 +838,11 @@ function renderSetBuilderList() {
   const words = readWordBank();
   if (!setBuilderList) return;
 
+  if (chunkSetCheckbox && chunkSetCheckbox.checked) {
+    setBuilderList.innerHTML = '<p class="empty-state">Chunking uses the unassigned words automatically. No word selection needed.</p>';
+    return;
+  }
+
   if (!words.length) {
     setBuilderList.innerHTML = '<p class="empty-state">No words yet. Upload a CSV or JSON file first.</p>';
     return;
@@ -845,12 +850,13 @@ function renderSetBuilderList() {
 
   setBuilderList.innerHTML = words
     .map((word, index) => `
-      <button type="button" class="word-select-row ${selectedWordIndexes.has(index) ? 'selected' : ''}" data-word-index="${index}">
+      <label class="word-select-row ${selectedWordIndexes.has(index) ? 'selected' : ''}" data-word-index="${index}">
+        <input type="checkbox" data-word-index="${index}" ${selectedWordIndexes.has(index) ? 'checked' : ''} />
         <div>
           <strong>${word.front || 'Untitled word'}</strong>
           <small>${word.back || word.phrase || word.note || 'No definition yet'}</small>
         </div>
-      </button>
+      </label>
     `)
     .join('');
 }
@@ -863,9 +869,13 @@ function applyWordSelection(index, shouldSelect) {
   }
 
   if (setBuilderList) {
-    const row = setBuilderList.querySelector(`[data-word-index="${index}"]`);
+    const row = setBuilderList.querySelector(`.word-select-row[data-word-index="${index}"]`);
     if (row) {
       row.classList.toggle('selected', shouldSelect);
+    }
+    const checkbox = setBuilderList.querySelector(`input[data-word-index="${index}"]`);
+    if (checkbox) {
+      checkbox.checked = shouldSelect;
     }
   }
 }
@@ -888,6 +898,9 @@ function updateSetBuilderMode() {
   }
   if (setNameInput) {
     setNameInput.placeholder = isChunked ? 'Base name for chunked sets' : 'Name this set';
+  }
+  if (setBuilderList) {
+    renderSetBuilderList();
   }
 }
 
@@ -1433,29 +1446,13 @@ if (chunkSetCheckbox) {
 }
 
 if (setBuilderList) {
-  setBuilderList.addEventListener('pointerdown', (event) => {
-    const row = event.target.closest('.word-select-row');
-    if (!row) return;
-    event.preventDefault();
-    const index = Number(row.dataset.wordIndex);
-    const isSelected = selectedWordIndexes.has(index);
-    draggingSelectionMode = !isSelected;
-    isDraggingWordSelection = true;
-    applyWordSelection(index, draggingSelectionMode);
-  });
-
-  setBuilderList.addEventListener('pointerover', (event) => {
-    if (!isDraggingWordSelection) return;
-    const row = event.target.closest('.word-select-row');
-    if (!row) return;
-    const index = Number(row.dataset.wordIndex);
-    applyWordSelection(index, draggingSelectionMode);
+  setBuilderList.addEventListener('change', (event) => {
+    const checkbox = event.target.closest('input[type="checkbox"][data-word-index]');
+    if (!checkbox) return;
+    const index = Number(checkbox.dataset.wordIndex);
+    applyWordSelection(index, checkbox.checked);
   });
 }
-
-document.addEventListener('pointerup', () => {
-  isDraggingWordSelection = false;
-});
 
 removeLegacyDemoSetsFromStorage();
 updateUsernameStatus();
