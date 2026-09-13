@@ -33,6 +33,12 @@ const deleteCardButton = document.getElementById('delete-card-btn');
 const beginStudyButton = document.getElementById('begin-study-btn');
 const studySetHeaderButton = document.getElementById('study-set-header-button');
 const setReviewList = document.getElementById('set-review-list');
+const contextGame = document.getElementById('context-game');
+const contextGameMeaning = document.getElementById('context-game-meaning');
+const contextGamePhrase = document.getElementById('context-game-phrase');
+const contextGameAnswer = document.getElementById('context-game-answer');
+const contextGameFeedback = document.getElementById('context-game-feedback');
+const contextGameNext = document.getElementById('context-game-next');
 const studyActions = document.querySelector('.study-actions');
 const studyFooter = document.querySelector('.study-footer');
 const tabButtons = document.querySelectorAll('.tab-button');
@@ -1149,6 +1155,7 @@ function showMainView() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
+  if (contextGame) contextGame.classList.add('hidden');
   if (studyHeaderCopy) studyHeaderCopy.classList.remove('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
   if (studyActions) studyActions.classList.remove('hidden');
@@ -1200,10 +1207,47 @@ function beginStudySession() {
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (studyHeaderCopy) studyHeaderCopy.classList.add('hidden');
+  if (contextGame) contextGame.classList.add('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
   if (studyActions) studyActions.classList.remove('hidden');
   if (studyFooter) studyFooter.classList.remove('hidden');
   renderCurrentCard();
+}
+
+function normalizeAnswer(value) {
+  return String(value || '').trim().toLocaleLowerCase('uk-UA').replace(/\s+/g, ' ');
+}
+
+function renderContextGameCard() {
+  const card = currentCards[currentIndex];
+  if (!card) return;
+
+  contextGameMeaning.textContent = card.back || 'Translate the word from context';
+  contextGamePhrase.textContent = card.phrase || `(${card.front})`;
+  contextGameAnswer.value = '';
+  contextGameFeedback.textContent = '';
+  contextGameFeedback.className = 'status';
+  contextGameNext.classList.add('hidden');
+  contextGameAnswer.focus();
+}
+
+function startContextWritingGame() {
+  if (!currentCards.length) return;
+  if (setReviewList) setReviewList.classList.add('hidden');
+  if (beginStudyButton) beginStudyButton.classList.add('hidden');
+  if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
+  if (studyHeaderCopy) studyHeaderCopy.classList.add('hidden');
+  if (flashcard) flashcard.classList.add('hidden');
+  if (studyActions) studyActions.classList.add('hidden');
+  if (studyFooter) studyFooter.classList.add('hidden');
+  if (contextGame) contextGame.classList.remove('hidden');
+  currentIndex = 0;
+  renderContextGameCard();
+}
+
+function advanceContextGame() {
+  currentIndex = (currentIndex + 1) % currentCards.length;
+  renderContextGameCard();
 }
 
 function renderCurrentCard() {
@@ -1454,7 +1498,26 @@ if (deleteCardButton) {
 }
 
 if (beginStudyButton) {
-  beginStudyButton.addEventListener('click', beginStudySession);
+  beginStudyButton.addEventListener('click', startContextWritingGame);
+}
+
+if (contextGame) {
+  contextGame.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const card = currentCards[currentIndex];
+    if (!card) return;
+
+    const isCorrect = normalizeAnswer(contextGameAnswer.value) === normalizeAnswer(card.front);
+    contextGameFeedback.textContent = isCorrect
+      ? 'Correct!'
+      : `Not quite. The word is ${card.front}.`;
+    contextGameFeedback.className = `status ${isCorrect ? 'success' : 'error'}`;
+    contextGameNext.classList.remove('hidden');
+  });
+}
+
+if (contextGameNext) {
+  contextGameNext.addEventListener('click', advanceContextGame);
 }
 
 if (studySetHeaderButton) {
@@ -1472,6 +1535,7 @@ function showHomeScreen() {
   app.classList.remove('hidden');
   studyPanel.classList.add('hidden');
   if (accountButton) accountButton.classList.remove('hidden');
+  if (contextGame) contextGame.classList.add('hidden');
   if (tabBar) {
     tabBar.classList.remove('hidden');
   }
