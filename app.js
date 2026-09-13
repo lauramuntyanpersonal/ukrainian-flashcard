@@ -1249,8 +1249,10 @@ function startContextWritingGame() {
 }
 
 function advanceContextGame() {
+  const currentScrollPosition = window.scrollY;
   currentIndex = (currentIndex + 1) % currentCards.length;
   renderContextGameCard();
+  window.scrollTo(0, currentScrollPosition);
 }
 
 function renderCurrentCard() {

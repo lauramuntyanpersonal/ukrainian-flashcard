@@ -721,6 +721,8 @@ button.mini {
 
 .study-panel {
   margin-top: 20px;
+  min-height: 100vh;
+  padding-bottom: max(240px, 35vh);
 }
 
 .set-review-list {
