@@ -267,6 +267,20 @@ button.mini {
   display: none;
 }
 
+.set-builder-mode {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.set-builder-mode h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
 .set-builder-actions {
   display: flex;
   flex-wrap: wrap;
@@ -333,7 +347,7 @@ button.mini {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   background: #f7f9ff;
   border: 1px solid var(--border);
   color: var(--text);
@@ -342,6 +356,25 @@ button.mini {
   text-align: left;
   transform: translateX(0);
   transition: transform 0.18s ease;
+}
+
+.set-item-button {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  padding: 0;
+}
+
+.set-rename-action {
+  border: 1px solid var(--border);
+  background: #eef3ff;
+  color: var(--primary-dark);
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 .set-item-copy {

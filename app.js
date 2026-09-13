@@ -16,7 +16,8 @@ const wordsList = document.getElementById('words-list');
 const addSetButton = document.getElementById('add-set-button');
 const setBuilder = document.getElementById('set-builder');
 const setBuilderList = document.getElementById('set-builder-list');
-const newSetNameInput = document.getElementById('new-set-name-input');
+const selectedSetNameInput = document.getElementById('selected-set-name-input');
+const chunkedSetNameInput = document.getElementById('chunked-set-name-input');
 const setSizeInput = document.getElementById('set-size-input');
 const createSetFromWordBankButton = document.getElementById('create-set-from-word-bank');
 const createChunkedSetsButton = document.getElementById('create-chunked-sets');
@@ -672,6 +673,21 @@ function getWordMembershipInfo(word) {
   return matchingSets.map((set) => set.name);
 }
 
+function renameSetById(setId, nextName) {
+  const trimmedName = String(nextName || '').trim();
+  if (!trimmedName) return false;
+
+  const nextSets = readSets().map((set) => {
+    if (set.id !== setId) return set;
+    return { ...set, name: trimmedName };
+  });
+
+  saveSets(nextSets);
+  renderSetList();
+  renderWordList();
+  return true;
+}
+
 function renderSetList() {
   const sets = readSets();
   if (!sets.length) {
@@ -683,17 +699,20 @@ function renderSetList() {
     .map((set) => `
       <div class="set-item" data-set-id="${set.id}">
         <button type="button" class="set-delete-action" data-set-id="${set.id}" aria-label="Delete set ${set.name}">Delete</button>
-        <button type="button" class="set-item-main" data-set-id="${set.id}">
-          <div class="set-item-copy">
-            <strong>${set.name}</strong>
-            <small>${(set.cards || []).length} cards</small>
-          </div>
-        </button>
+        <div class="set-item-main" data-set-id="${set.id}">
+          <button type="button" class="set-item-button" data-set-id="${set.id}">
+            <div class="set-item-copy">
+              <strong>${set.name}</strong>
+              <small>${(set.cards || []).length} cards</small>
+            </div>
+          </button>
+          <button type="button" class="set-rename-action" data-set-id="${set.id}">Rename</button>
+        </div>
       </div>
     `)
     .join('');
 
-  setList.querySelectorAll('.set-item-main').forEach((button) => {
+  setList.querySelectorAll('.set-item-button').forEach((button) => {
     button.addEventListener('click', () => {
       const row = button.closest('.set-item');
       if (row && row.classList.contains('is-swiped')) {
@@ -701,6 +720,17 @@ function renderSetList() {
         return;
       }
       openSet(button.dataset.setId);
+    });
+  });
+
+  setList.querySelectorAll('.set-rename-action').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const setId = button.dataset.setId;
+      const set = readSets().find((entry) => entry.id === setId);
+      const nextName = window.prompt('Rename this set', set?.name || '');
+      if (nextName === null) return;
+      renameSetById(setId, nextName);
     });
   });
 
@@ -841,7 +871,7 @@ function createSetFromWordBank() {
     return;
   }
 
-  const name = (newSetNameInput ? newSetNameInput.value.trim() : '').replace(/\s+/g, ' ');
+  const name = (selectedSetNameInput ? selectedSetNameInput.value.trim() : '').replace(/\s+/g, ' ');
   const finalName = name || `Custom set ${readSets().length + 1}`;
 
   const newSet = {
@@ -853,7 +883,7 @@ function createSetFromWordBank() {
 
   const nextSets = [newSet, ...readSets()];
   saveSets(nextSets);
-  if (newSetNameInput) newSetNameInput.value = '';
+  if (selectedSetNameInput) selectedSetNameInput.value = '';
   selectedWordIndexes.clear();
   if (setBuilder) setBuilder.classList.add('hidden');
   renderSetBuilderList();
@@ -874,7 +904,7 @@ function createChunkedSetsFromWordBank() {
 
   const chunkSizeValue = Number(setSizeInput ? setSizeInput.value : 50);
   const chunkSize = Number.isFinite(chunkSizeValue) && chunkSizeValue > 0 ? Math.min(500, Math.floor(chunkSizeValue)) : 50;
-  const baseName = (newSetNameInput ? newSetNameInput.value.trim() : '').replace(/\s+/g, ' ') || 'Chunked set';
+  const baseName = (chunkedSetNameInput ? chunkedSetNameInput.value.trim() : '').replace(/\s+/g, ' ') || 'Chunked set';
   const chunks = chunkWords(sourceWords, chunkSize);
 
   const builtSets = chunks.map((chunk, index) => ({
@@ -882,12 +912,13 @@ function createChunkedSetsFromWordBank() {
     name: chunks.length === 1 ? baseName : `${baseName} ${index + 1}`,
     description: `${chunk.length} cards`,
     cards: chunk,
+    sourceMode: 'chunked',
   }));
 
   const nextSets = [...builtSets, ...readSets()];
   saveSets(nextSets);
 
-  if (newSetNameInput) newSetNameInput.value = '';
+  if (chunkedSetNameInput) chunkedSetNameInput.value = '';
   if (setSizeInput) setSizeInput.value = String(chunkSize);
   selectedWordIndexes.clear();
   if (setBuilder) setBuilder.classList.add('hidden');
@@ -900,8 +931,8 @@ function createChunkedSetsFromWordBank() {
 function toggleSetBuilder() {
   if (!setBuilder) return;
   const isHidden = setBuilder.classList.toggle('hidden');
-  if (!isHidden && newSetNameInput) {
-    newSetNameInput.focus();
+  if (!isHidden && selectedSetNameInput) {
+    selectedSetNameInput.focus();
   }
   if (!setBuilder.classList.contains('hidden')) {
     renderSetBuilderList();
