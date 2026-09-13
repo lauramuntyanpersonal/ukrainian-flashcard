@@ -26,6 +26,7 @@ const app = document.getElementById('app');
 const studyPanel = document.getElementById('study-panel');
 const flashcard = document.getElementById('flashcard');
 const studyTitle = document.getElementById('study-title');
+const studyHeaderCopy = document.querySelector('.study-header-copy');
 const backButton = document.getElementById('back-button');
 const navBackButton = document.getElementById('nav-back-button');
 const deleteCardButton = document.getElementById('delete-card-btn');
@@ -1148,6 +1149,7 @@ function showMainView() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
+  if (studyHeaderCopy) studyHeaderCopy.classList.remove('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
   if (studyActions) studyActions.classList.remove('hidden');
   if (studyFooter) studyFooter.classList.remove('hidden');
@@ -1175,6 +1177,7 @@ function renderSetReviewList() {
 }
 
 function showSetReviewMode() {
+  if (studyHeaderCopy) studyHeaderCopy.classList.remove('hidden');
   if (setReviewList) {
     setReviewList.classList.remove('hidden');
     renderSetReviewList();
@@ -1189,6 +1192,8 @@ function showSetReviewMode() {
 function beginStudySession() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
+  if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
+  if (studyHeaderCopy) studyHeaderCopy.classList.add('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
   if (studyActions) studyActions.classList.remove('hidden');
   if (studyFooter) studyFooter.classList.remove('hidden');
