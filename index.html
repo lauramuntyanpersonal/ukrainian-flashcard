@@ -173,7 +173,9 @@
           if (current !== latest) {
             localStorage.setItem('ukrainian-flashcards-version', latest);
             if (current) {
-              window.location.reload();
+              const nextUrl = new URL(window.location.href);
+              nextUrl.searchParams.set('v', String(Date.now()));
+              window.location.replace(nextUrl.toString());
             }
             return;
           }
@@ -182,7 +184,7 @@
             localStorage.setItem('ukrainian-flashcards-version', latest);
           }
         } catch (error) {
-          // Ignore and continue; browser will still use stale HTML until the next refresh.
+          // Ignore and continue; the next load will retry the version check.
         }
       }
 
