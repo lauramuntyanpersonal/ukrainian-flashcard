@@ -235,6 +235,91 @@ button.mini {
   grid-template-columns: 1fr;
 }
 
+.set-builder {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #f7f9ff;
+}
+
+.set-builder.hidden {
+  display: none;
+}
+
+.set-builder-list {
+  display: grid;
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.word-select-row {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: white;
+  color: var(--text);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  touch-action: pan-y;
+}
+
+.word-select-row.selected {
+  background: #eaf0ff;
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px rgba(36, 71, 246, 0.12);
+}
+
+.word-select-row strong,
+.word-select-row small {
+  display: block;
+}
+
+.word-select-row small {
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.set-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.set-item-main {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: #f7f9ff;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px 14px;
+  border-radius: 12px;
+}
+
+.set-item-main small {
+  color: var(--muted);
+  display: block;
+  margin-top: 4px;
+}
+
+.set-delete-button {
+  background: #fff3f3;
+  color: var(--danger);
+  border: 1px solid rgba(217, 48, 37, 0.2);
+  padding: 0 14px;
+  min-width: 70px;
+}
+
 .username-modal {
   position: fixed;
   inset: 0;

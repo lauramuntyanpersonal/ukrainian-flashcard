@@ -55,7 +55,19 @@
         <section class="panel tab-panel" data-panel="sets">
           <div class="section-header">
             <h2>Your sets</h2>
+            <button id="add-set-button" class="ghost mini" type="button">Add set</button>
           </div>
+
+          <div id="set-builder" class="set-builder hidden">
+            <label for="new-set-name-input">
+              <span>Set name</span>
+            </label>
+            <input id="new-set-name-input" type="text" maxlength="40" placeholder="Name this set" />
+            <p class="helper-text compact">Drag across words to select them.</p>
+            <div id="set-builder-list" class="set-builder-list"></div>
+            <button id="create-set-from-word-bank" type="button">Create set</button>
+          </div>
+
           <div id="set-list" class="set-list"></div>
         </section>
 

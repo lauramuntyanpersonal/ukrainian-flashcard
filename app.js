@@ -37,6 +37,11 @@ const createSelectedSetButton = document.getElementById('create-selected-set');
 const selectAllRowsButton = document.getElementById('select-all-rows');
 const setList = document.getElementById('set-list');
 const wordsList = document.getElementById('words-list');
+const addSetButton = document.getElementById('add-set-button');
+const setBuilder = document.getElementById('set-builder');
+const setBuilderList = document.getElementById('set-builder-list');
+const newSetNameInput = document.getElementById('new-set-name-input');
+const createSetFromWordBankButton = document.getElementById('create-set-from-word-bank');
 const app = document.getElementById('app');
 const studyPanel = document.getElementById('study-panel');
 const flashcard = document.getElementById('flashcard');
@@ -71,6 +76,9 @@ let currentIndex = 0;
 let flipped = false;
 let currentCards = [];
 let pendingUploadRows = [];
+let selectedWordIndexes = new Set();
+let isDraggingWordSelection = false;
+let draggingSelectionMode = true;
 
 function toId(value) {
   return `${value.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-` + Date.now().toString(36);
@@ -508,25 +516,114 @@ function renderWordList() {
 function renderSetList() {
   const sets = readSets();
   if (!sets.length) {
-    setList.innerHTML = '<p class="empty-state">No sets yet. Upload your first CSV or JSON file.</p>';
+    setList.innerHTML = '<p class="empty-state">No sets yet. Create one from your word bank.</p>';
     return;
   }
 
   setList.innerHTML = sets
     .map((set) => `
-      <button type="button" class="set-item" data-set-id="${set.id}">
-        <div>
-          <strong>${set.name}</strong>
-          <small>${(set.cards || []).length} cards</small>
-        </div>
-        <span>Study →</span>
-      </button>
+      <div class="set-item" data-set-id="${set.id}">
+        <button type="button" class="set-item-main" data-set-id="${set.id}">
+          <div>
+            <strong>${set.name}</strong>
+            <small>${(set.cards || []).length} cards</small>
+          </div>
+          <span>Study →</span>
+        </button>
+        <button type="button" class="set-delete-button" data-set-id="${set.id}">Delete</button>
+      </div>
     `)
     .join('');
 
-  setList.querySelectorAll('.set-item').forEach((button) => {
+  setList.querySelectorAll('.set-item-main').forEach((button) => {
     button.addEventListener('click', () => openSet(button.dataset.setId));
   });
+
+  setList.querySelectorAll('.set-delete-button').forEach((button) => {
+    button.addEventListener('click', () => {
+      const setId = button.dataset.setId;
+      const nextSets = readSets().filter((set) => set.id !== setId);
+      saveSets(nextSets);
+      renderSetList();
+      showStatus('Set deleted.', 'success');
+    });
+  });
+}
+
+function renderSetBuilderList() {
+  const words = readWordBank();
+  if (!setBuilderList) return;
+
+  if (!words.length) {
+    setBuilderList.innerHTML = '<p class="empty-state">No words yet. Upload a CSV or JSON file first.</p>';
+    return;
+  }
+
+  setBuilderList.innerHTML = words
+    .map((word, index) => `
+      <button type="button" class="word-select-row ${selectedWordIndexes.has(index) ? 'selected' : ''}" data-word-index="${index}">
+        <div>
+          <strong>${word.front || 'Untitled word'}</strong>
+          <small>${word.back || word.phrase || word.note || 'No definition yet'}</small>
+        </div>
+      </button>
+    `)
+    .join('');
+}
+
+function applyWordSelection(index, shouldSelect) {
+  if (shouldSelect) {
+    selectedWordIndexes.add(index);
+  } else {
+    selectedWordIndexes.delete(index);
+  }
+
+  if (setBuilderList) {
+    const row = setBuilderList.querySelector(`[data-word-index="${index}"]`);
+    if (row) {
+      row.classList.toggle('selected', shouldSelect);
+    }
+  }
+}
+
+function createSetFromWordBank() {
+  const words = readWordBank();
+  const selected = [...selectedWordIndexes].map((index) => words[index]).filter(Boolean);
+
+  if (!selected.length) {
+    showStatus('Select at least one word before creating a set.', 'error');
+    return;
+  }
+
+  const name = (newSetNameInput ? newSetNameInput.value.trim() : '').replace(/\s+/g, ' ');
+  const finalName = name || `Custom set ${readSets().length + 1}`;
+
+  const newSet = {
+    id: toId(finalName),
+    name: finalName,
+    description: `${selected.length} cards`,
+    cards: selected,
+  };
+
+  const nextSets = [newSet, ...readSets()];
+  saveSets(nextSets);
+  if (newSetNameInput) newSetNameInput.value = '';
+  selectedWordIndexes.clear();
+  if (setBuilder) setBuilder.classList.add('hidden');
+  renderSetBuilderList();
+  renderSetList();
+  showStatus(`Created set: ${finalName}`, 'success');
+}
+
+function toggleSetBuilder() {
+  if (!setBuilder) return;
+  const isHidden = setBuilder.classList.toggle('hidden');
+  if (!isHidden && newSetNameInput) {
+    newSetNameInput.focus();
+  }
+  if (!setBuilder.classList.contains('hidden')) {
+    renderSetBuilderList();
+  }
 }
 
 function showStatus(message, kind = '') {
@@ -881,6 +978,39 @@ if (startUsernameInput) {
     }
   });
 }
+
+if (addSetButton) {
+  addSetButton.addEventListener('click', toggleSetBuilder);
+}
+
+if (createSetFromWordBankButton) {
+  createSetFromWordBankButton.addEventListener('click', createSetFromWordBank);
+}
+
+if (setBuilderList) {
+  setBuilderList.addEventListener('pointerdown', (event) => {
+    const row = event.target.closest('.word-select-row');
+    if (!row) return;
+    event.preventDefault();
+    const index = Number(row.dataset.wordIndex);
+    const isSelected = selectedWordIndexes.has(index);
+    draggingSelectionMode = !isSelected;
+    isDraggingWordSelection = true;
+    applyWordSelection(index, draggingSelectionMode);
+  });
+
+  setBuilderList.addEventListener('pointerover', (event) => {
+    if (!isDraggingWordSelection) return;
+    const row = event.target.closest('.word-select-row');
+    if (!row) return;
+    const index = Number(row.dataset.wordIndex);
+    applyWordSelection(index, draggingSelectionMode);
+  });
+}
+
+document.addEventListener('pointerup', () => {
+  isDraggingWordSelection = false;
+});
 
 updateUsernameStatus();
 ensureUsernamePrompt();
