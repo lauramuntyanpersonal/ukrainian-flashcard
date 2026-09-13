@@ -1229,6 +1229,18 @@ function goNext() {
   renderCurrentCard();
 }
 
+function openGoogleTranslateText(text, language = 'uk-UA') {
+  if (!text) return;
+
+  const cleanText = String(text).trim();
+  if (!cleanText) return;
+
+  const targetLanguage = language === 'uk-UA' ? 'uk' : 'en';
+  const fromLanguage = language === 'uk-UA' ? 'uk' : 'en';
+  const translateUrl = `https://translate.google.com/?sl=${fromLanguage}&tl=${targetLanguage}&text=${encodeURIComponent(cleanText)}&op=translate`;
+  window.open(translateUrl, '_blank', 'noopener,noreferrer');
+}
+
 function playGoogleTranslateAudio(text, language = 'uk-UA') {
   if (!text) return;
 
@@ -1247,14 +1259,19 @@ function playGoogleTranslateAudio(text, language = 'uk-UA') {
   activeAudio = audio;
   audio.volume = 1;
   audio.play().catch(() => {
-    if (!('speechSynthesis' in window)) return;
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = language;
-    utterance.rate = 0.95;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      utterance.lang = language;
+      utterance.rate = 0.95;
+      utterance.pitch = 1;
+      utterance.volume = 1;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+      activeAudio = null;
+      return;
+    }
+
+    openGoogleTranslateText(cleanText, language);
     activeAudio = null;
   });
 }
@@ -1264,6 +1281,18 @@ function speakText(text, language = 'uk-UA') {
 
   const cleanText = String(text).trim();
   if (!cleanText) return;
+
+  const browserSpeechAvailable = 'speechSynthesis' in window && window.speechSynthesis && window.speechSynthesis.getVoices().length > 0;
+  if (browserSpeechAvailable) {
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = language;
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+    return;
+  }
 
   playGoogleTranslateAudio(cleanText, language);
 }
