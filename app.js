@@ -1261,9 +1261,12 @@ function startContextWritingGame() {
 
 function advanceContextGame() {
   const currentScrollPosition = window.scrollY;
+  const currentPanelScrollPosition = studyPanel.scrollTop;
   currentIndex = (currentIndex + 1) % currentCards.length;
   renderContextGameCard();
   window.scrollTo(0, currentScrollPosition);
+  studyPanel.scrollTop = currentPanelScrollPosition;
+  contextGameAnswer.focus({ preventScroll: true });
 }
 
 function renderCurrentCard() {
