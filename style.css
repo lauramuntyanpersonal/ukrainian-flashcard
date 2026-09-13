@@ -813,7 +813,7 @@ button.mini {
 }
 
 .study-panel.context-writing-active .context-game {
-  margin-bottom: 20vh;
+  margin-bottom: 0;
 }
 
 @media (min-width: 641px) {
