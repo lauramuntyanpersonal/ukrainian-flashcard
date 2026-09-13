@@ -53,7 +53,18 @@
             <button id="refresh-words-button" class="ghost mini" type="button">Refresh</button>
           </div>
 
-          <button id="toggle-add-word-form" class="ghost" type="button">Add word</button>
+          <div class="word-toolbar">
+            <span id="word-count" class="word-count">0 words</span>
+            <label class="sort-control" for="word-sort-select">
+              <span>Sort</span>
+              <select id="word-sort-select">
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+              </select>
+            </label>
+          </div>
+
+          <button id="toggle-add-word-form" class="ghost add-word-toggle" type="button">Add word</button>
 
           <form id="add-word-form" class="add-word-form hidden">
             <label>

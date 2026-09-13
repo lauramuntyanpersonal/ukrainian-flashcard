@@ -440,6 +440,42 @@ button.mini {
   display: none;
 }
 
+.word-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.word-count {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.sort-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.sort-control select {
+  min-width: 110px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.add-word-toggle {
+  margin-top: 8px;
+  margin-bottom: 14px;
+}
+
 .words-list,
 .set-list {
   display: grid;

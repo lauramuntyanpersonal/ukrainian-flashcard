@@ -32,6 +32,8 @@ const studyFooter = document.querySelector('.study-footer');
 const tabButtons = document.querySelectorAll('.tab-button');
 const tabPanels = document.querySelectorAll('.tab-panel');
 const refreshWordsButton = document.getElementById('refresh-words-button');
+const wordCountLabel = document.getElementById('word-count');
+const wordSortSelect = document.getElementById('word-sort-select');
 const toggleAddWordFormButton = document.getElementById('toggle-add-word-form');
 const addWordForm = document.getElementById('add-word-form');
 const addWordFrontInput = document.getElementById('add-word-front');
@@ -508,18 +510,46 @@ function deleteWordByIndex(index) {
   showStatus('Word deleted.', 'success');
 }
 
+function getWordSortPreference() {
+  const stored = localStorage.getItem('ukrainian-flashcards-word-sort-v1');
+  return stored === 'oldest' ? 'oldest' : 'newest';
+}
+
+function setWordSortPreference(sortOrder) {
+  const safeOrder = sortOrder === 'oldest' ? 'oldest' : 'newest';
+  localStorage.setItem('ukrainian-flashcards-word-sort-v1', safeOrder);
+}
+
 function renderWordList() {
   const words = readWordBank();
-  if (!words.length) {
+  const sortOrder = getWordSortPreference();
+  const orderedWords = sortOrder === 'oldest' ? [...words] : [...words].reverse();
+
+  if (wordCountLabel) {
+    const totalWordText = `${words.length} ${words.length === 1 ? 'word' : 'words'}`;
+    wordCountLabel.textContent = totalWordText;
+  }
+
+  if (wordSortSelect) {
+    wordSortSelect.value = sortOrder;
+  }
+
+  if (!orderedWords.length) {
     wordsList.innerHTML = '<p class="empty-state">No words yet. Upload a CSV or JSON to build your word bank.</p>';
     return;
   }
 
-  wordsList.innerHTML = words
-    .map((word, index) => `
-      <div class="word-row" data-word-index="${index}">
-        <button type="button" class="word-delete-action" data-word-index="${index}" aria-label="Delete word ${word.front || 'word'}">Delete</button>
-        <div class="word-content" data-word-index="${index}">
+  const visibleWords = orderedWords.map((word, index) => ({
+    ...word,
+    displayIndex: words.indexOf(word),
+    listIndex: index,
+  }));
+
+  wordsList.innerHTML = visibleWords
+    .map(({ displayIndex, ...word }, index) => `
+      <div class="word-row" data-word-index="${displayIndex}">
+        <button type="button" class="word-delete-action" data-word-index="${displayIndex}" aria-label="Delete word ${word.front || 'word'}">Delete</button>
+        <div class="word-content" data-word-index="${displayIndex}">
           <div class="word-main">
             <strong>${word.front || 'Untitled word'}</strong>
             <span>${word.back || word.phrase || word.note || 'No definition yet'}</span>
@@ -1069,6 +1099,14 @@ refreshWordsButton.addEventListener('click', () => {
   renderWordList();
   showStatus('Word list refreshed.', 'success');
 });
+
+if (wordSortSelect) {
+  wordSortSelect.addEventListener('change', (event) => {
+    const nextSort = event.target.value === 'oldest' ? 'oldest' : 'newest';
+    setWordSortPreference(nextSort);
+    renderWordList();
+  });
+}
 
 function applyWordInputKeyboardHints() {
   if (addWordFrontInput) {
