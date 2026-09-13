@@ -267,6 +267,12 @@ button.mini {
   display: none;
 }
 
+.set-builder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .set-builder-list {
   display: grid;
   gap: 8px;
@@ -302,6 +308,12 @@ button.mini {
 .word-select-row small {
   color: var(--muted);
   margin-top: 4px;
+}
+
+.word-set-status {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
 }
 
 .set-item {

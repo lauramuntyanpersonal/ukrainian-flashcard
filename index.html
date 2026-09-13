@@ -96,9 +96,16 @@
               <span>Set name</span>
             </label>
             <input id="new-set-name-input" type="text" maxlength="40" placeholder="Name this set" />
-            <p class="helper-text compact">Drag across words to select them.</p>
+            <label for="set-size-input">
+              <span>Words per set</span>
+            </label>
+            <input id="set-size-input" type="number" min="1" max="500" value="50" placeholder="50" />
+            <p class="helper-text compact">Drag across words to select them, or make chunked sets from the whole word bank.</p>
             <div id="set-builder-list" class="set-builder-list"></div>
-            <button id="create-set-from-word-bank" type="button">Create set</button>
+            <div class="set-builder-actions">
+              <button id="create-set-from-word-bank" type="button">Create selected set</button>
+              <button id="create-chunked-sets" class="secondary" type="button">Create chunked sets</button>
+            </div>
           </div>
 
           <div id="set-list" class="set-list"></div>

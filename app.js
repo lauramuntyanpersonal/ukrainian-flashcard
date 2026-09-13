@@ -17,7 +17,9 @@ const addSetButton = document.getElementById('add-set-button');
 const setBuilder = document.getElementById('set-builder');
 const setBuilderList = document.getElementById('set-builder-list');
 const newSetNameInput = document.getElementById('new-set-name-input');
+const setSizeInput = document.getElementById('set-size-input');
 const createSetFromWordBankButton = document.getElementById('create-set-from-word-bank');
+const createChunkedSetsButton = document.getElementById('create-chunked-sets');
 const app = document.getElementById('app');
 const studyPanel = document.getElementById('study-panel');
 const flashcard = document.getElementById('flashcard');
@@ -539,25 +541,29 @@ function renderWordList() {
     return;
   }
 
-  const visibleWords = orderedWords.map((word, index) => ({
+  const visibleWords = orderedWords.map((word) => ({
     ...word,
     displayIndex: words.indexOf(word),
-    listIndex: index,
+    setNames: getWordMembershipInfo(word),
   }));
 
   wordsList.innerHTML = visibleWords
-    .map(({ displayIndex, ...word }, index) => `
-      <div class="word-row" data-word-index="${displayIndex}">
-        <button type="button" class="word-delete-action" data-word-index="${displayIndex}" aria-label="Delete word ${word.front || 'word'}">Delete</button>
-        <div class="word-content" data-word-index="${displayIndex}">
-          <div class="word-main">
-            <strong>${word.front || 'Untitled word'}</strong>
-            <span>${word.back || word.phrase || word.note || 'No definition yet'}</span>
+    .map(({ displayIndex, setNames, ...word }) => {
+      const membershipLabel = setNames.length ? `In set: ${setNames.join(', ')}` : 'Not in any set';
+      return `
+        <div class="word-row" data-word-index="${displayIndex}">
+          <button type="button" class="word-delete-action" data-word-index="${displayIndex}" aria-label="Delete word ${word.front || 'word'}">Delete</button>
+          <div class="word-content" data-word-index="${displayIndex}">
+            <div class="word-main">
+              <strong>${word.front || 'Untitled word'}</strong>
+              <span>${word.back || word.phrase || word.note || 'No definition yet'}</span>
+            </div>
+            ${word.phrase ? `<small class="word-phrase">${word.phrase}</small>` : ''}
+            <small class="word-set-status">${membershipLabel}</small>
           </div>
-          ${word.phrase ? `<small class="word-phrase">${word.phrase}</small>` : ''}
         </div>
-      </div>
-    `)
+      `;
+    })
     .join('');
 
   wordsList.querySelectorAll('.word-delete-action').forEach((button) => {
@@ -647,7 +653,23 @@ function deleteSetById(setId) {
   const nextSets = readSets().filter((set) => set.id !== setId);
   saveSets(nextSets);
   renderSetList();
+  renderWordList();
   showStatus('Set deleted.', 'success');
+}
+
+function getWordMembershipInfo(word) {
+  const sets = readSets();
+  const wordKey = word?.id || [word?.front || '', word?.back || '', word?.phrase || '', word?.note || ''].join('|');
+
+  const matchingSets = sets.filter((set) => {
+    const cards = Array.isArray(set.cards) ? set.cards : [];
+    return cards.some((card) => {
+      const cardKey = card?.id || [card?.front || '', card?.back || '', card?.phrase || '', card?.note || ''].join('|');
+      return cardKey === wordKey;
+    });
+  });
+
+  return matchingSets.map((set) => set.name);
 }
 
 function renderSetList() {
@@ -799,6 +821,17 @@ function applyWordSelection(index, shouldSelect) {
   }
 }
 
+function chunkWords(items, chunkSize) {
+  const safeChunkSize = Number.isFinite(chunkSize) && chunkSize > 0 ? Math.floor(chunkSize) : 50;
+  const chunks = [];
+
+  for (let index = 0; index < items.length; index += safeChunkSize) {
+    chunks.push(items.slice(index, index + safeChunkSize));
+  }
+
+  return chunks;
+}
+
 function createSetFromWordBank() {
   const words = readWordBank();
   const selected = [...selectedWordIndexes].map((index) => words[index]).filter(Boolean);
@@ -825,7 +858,43 @@ function createSetFromWordBank() {
   if (setBuilder) setBuilder.classList.add('hidden');
   renderSetBuilderList();
   renderSetList();
+  renderWordList();
   showStatus(`Created set: ${finalName}`, 'success');
+}
+
+function createChunkedSetsFromWordBank() {
+  const words = readWordBank();
+  const selected = [...selectedWordIndexes].map((index) => words[index]).filter(Boolean);
+  const sourceWords = selected.length ? selected : words;
+
+  if (!sourceWords.length) {
+    showStatus('Add some words before creating chunked sets.', 'error');
+    return;
+  }
+
+  const chunkSizeValue = Number(setSizeInput ? setSizeInput.value : 50);
+  const chunkSize = Number.isFinite(chunkSizeValue) && chunkSizeValue > 0 ? Math.min(500, Math.floor(chunkSizeValue)) : 50;
+  const baseName = (newSetNameInput ? newSetNameInput.value.trim() : '').replace(/\s+/g, ' ') || 'Chunked set';
+  const chunks = chunkWords(sourceWords, chunkSize);
+
+  const builtSets = chunks.map((chunk, index) => ({
+    id: toId(`${baseName} ${index + 1}`),
+    name: chunks.length === 1 ? baseName : `${baseName} ${index + 1}`,
+    description: `${chunk.length} cards`,
+    cards: chunk,
+  }));
+
+  const nextSets = [...builtSets, ...readSets()];
+  saveSets(nextSets);
+
+  if (newSetNameInput) newSetNameInput.value = '';
+  if (setSizeInput) setSizeInput.value = String(chunkSize);
+  selectedWordIndexes.clear();
+  if (setBuilder) setBuilder.classList.add('hidden');
+  renderSetBuilderList();
+  renderSetList();
+  renderWordList();
+  showStatus(`Created ${builtSets.length} set${builtSets.length === 1 ? '' : 's'} from ${sourceWords.length} words.`, 'success');
 }
 
 function toggleSetBuilder() {
@@ -1288,6 +1357,10 @@ if (addSetButton) {
 
 if (createSetFromWordBankButton) {
   createSetFromWordBankButton.addEventListener('click', createSetFromWordBank);
+}
+
+if (createChunkedSetsButton) {
+  createChunkedSetsButton.addEventListener('click', createChunkedSetsFromWordBank);
 }
 
 if (setBuilderList) {
