@@ -1232,7 +1232,6 @@ function renderContextGameCard() {
   contextGameFeedback.textContent = '';
   contextGameFeedback.className = 'status';
   contextGameNext.classList.add('hidden');
-  contextGameAnswer.focus();
 }
 
 function startContextWritingGame() {
