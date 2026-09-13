@@ -1247,7 +1247,7 @@ function startContextWritingGame() {
   currentIndex = 0;
   renderContextGameCard();
   requestAnimationFrame(() => {
-    window.scrollTo(0, document.documentElement.scrollHeight);
+    contextGame?.scrollIntoView({ block: 'start', behavior: 'auto' });
   });
 }
 
