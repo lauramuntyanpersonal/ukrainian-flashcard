@@ -287,13 +287,19 @@ button.mini {
 }
 
 .set-item {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
+  position: relative;
+  display: flex;
   align-items: stretch;
+  min-height: 72px;
+  overflow: hidden;
+  border-radius: 14px;
+  transition: transform 0.15s ease;
+  touch-action: pan-y;
 }
 
 .set-item-main {
+  position: relative;
+  z-index: 1;
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -302,8 +308,18 @@ button.mini {
   background: #f7f9ff;
   border: 1px solid var(--border);
   color: var(--text);
-  padding: 12px 14px;
-  border-radius: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  text-align: left;
+}
+
+.set-item-copy {
+  width: 100%;
+}
+
+.set-item-main strong {
+  display: block;
+  font-size: 1rem;
 }
 
 .set-item-main small {
@@ -312,12 +328,17 @@ button.mini {
   margin-top: 4px;
 }
 
-.set-delete-button {
-  background: #fff3f3;
-  color: var(--danger);
-  border: 1px solid rgba(217, 48, 37, 0.2);
-  padding: 0 14px;
-  min-width: 70px;
+.set-delete-swipe {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #ff7b7b, #d93025);
+  color: white;
+  font-weight: 700;
+  border-radius: 14px;
 }
 
 .username-modal {

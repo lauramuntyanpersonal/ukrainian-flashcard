@@ -513,6 +513,13 @@ function renderWordList() {
     .join('');
 }
 
+function deleteSetById(setId) {
+  const nextSets = readSets().filter((set) => set.id !== setId);
+  saveSets(nextSets);
+  renderSetList();
+  showStatus('Set deleted.', 'success');
+}
+
 function renderSetList() {
   const sets = readSets();
   if (!sets.length) {
@@ -523,14 +530,13 @@ function renderSetList() {
   setList.innerHTML = sets
     .map((set) => `
       <div class="set-item" data-set-id="${set.id}">
+        <div class="set-delete-swipe" data-set-id="${set.id}">Delete</div>
         <button type="button" class="set-item-main" data-set-id="${set.id}">
-          <div>
+          <div class="set-item-copy">
             <strong>${set.name}</strong>
             <small>${(set.cards || []).length} cards</small>
           </div>
-          <span>Study →</span>
         </button>
-        <button type="button" class="set-delete-button" data-set-id="${set.id}">Delete</button>
       </div>
     `)
     .join('');
@@ -539,14 +545,60 @@ function renderSetList() {
     button.addEventListener('click', () => openSet(button.dataset.setId));
   });
 
-  setList.querySelectorAll('.set-delete-button').forEach((button) => {
-    button.addEventListener('click', () => {
-      const setId = button.dataset.setId;
-      const nextSets = readSets().filter((set) => set.id !== setId);
-      saveSets(nextSets);
-      renderSetList();
-      showStatus('Set deleted.', 'success');
+  setList.querySelectorAll('.set-delete-swipe').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      deleteSetById(button.dataset.setId);
     });
+  });
+
+  setList.querySelectorAll('.set-item').forEach((row) => {
+    let startX = 0;
+    let startOffset = 0;
+    let dragging = false;
+
+    row.addEventListener('pointerdown', (event) => {
+      startX = event.clientX;
+      startOffset = 0;
+      dragging = true;
+      row.setPointerCapture(event.pointerId);
+    });
+
+    row.addEventListener('pointermove', (event) => {
+      if (!dragging) return;
+      const deltaX = event.clientX - startX;
+      if (deltaX < 0) {
+        const offset = Math.max(deltaX, -90);
+        row.style.transform = `translateX(${offset}px)`;
+        startOffset = offset;
+      }
+    });
+
+    function resetRow() {
+      dragging = false;
+      row.style.transform = '';
+      startOffset = 0;
+    }
+
+    row.addEventListener('pointerup', (event) => {
+      if (startOffset <= -70) {
+        event.stopPropagation();
+        deleteSetById(row.dataset.setId);
+      } else {
+        resetRow();
+      }
+    });
+
+    row.addEventListener('pointerleave', () => {
+      if (!dragging) return;
+      if (startOffset <= -70) {
+        deleteSetById(row.dataset.setId);
+      } else {
+        resetRow();
+      }
+    });
+
+    row.addEventListener('pointercancel', resetRow);
   });
 }
 
