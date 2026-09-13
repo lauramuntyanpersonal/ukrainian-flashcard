@@ -1170,7 +1170,7 @@ function showMainView() {
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
-  if (studyHeaderCopy) studyHeaderCopy.classList.remove('hidden');
+  if (studyTitle) studyTitle.classList.remove('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
   if (studyActions) studyActions.classList.remove('hidden');
   if (studyFooter) studyFooter.classList.remove('hidden');
@@ -1198,7 +1198,7 @@ function renderSetReviewList() {
 }
 
 function showSetReviewMode() {
-  if (studyHeaderCopy) studyHeaderCopy.classList.remove('hidden');
+  if (studyTitle) studyTitle.classList.remove('hidden');
   if (setReviewList) {
     setReviewList.classList.remove('hidden');
     renderSetReviewList();
@@ -1224,7 +1224,7 @@ function beginStudySession() {
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
-  if (studyHeaderCopy) studyHeaderCopy.classList.add('hidden');
+  if (studyTitle) studyTitle.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
   if (studyActions) studyActions.classList.remove('hidden');
@@ -1256,7 +1256,7 @@ function startContextWritingGame() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
-  if (studyHeaderCopy) studyHeaderCopy.classList.add('hidden');
+  if (studyTitle) studyTitle.classList.add('hidden');
   if (flashcard) flashcard.classList.add('hidden');
   if (studyActions) studyActions.classList.add('hidden');
   if (studyFooter) studyFooter.classList.add('hidden');

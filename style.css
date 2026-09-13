@@ -96,16 +96,22 @@ body {
 .study-panel > .topbar.compact {
   position: relative;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+}
+
+.study-header-copy {
+  flex: 1;
 }
 
 .study-header-actions {
   position: relative;
   display: flex;
   align-items: center;
-  margin-left: auto;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .study-settings-menu {
