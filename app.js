@@ -41,6 +41,7 @@ const contextGame = document.getElementById('context-game');
 const contextGameMeaning = document.getElementById('context-game-meaning');
 const contextGamePhrase = document.getElementById('context-game-phrase');
 const contextGameAnswer = document.getElementById('context-game-answer');
+const contextGameSubmit = document.getElementById('context-game-submit');
 const contextGameFeedback = document.getElementById('context-game-feedback');
 const contextGameNext = document.getElementById('context-game-next');
 const studyActions = document.querySelector('.study-actions');
@@ -1524,9 +1525,7 @@ if (contextGameStartButton) {
   contextGameStartButton.addEventListener('click', startContextWritingGame);
 }
 
-if (contextGame) {
-  contextGame.addEventListener('submit', (event) => {
-    event.preventDefault();
+function checkContextAnswer() {
     const currentScrollPosition = window.scrollY;
     const currentPanelScrollPosition = studyPanel.scrollTop;
     const card = currentCards[currentIndex];
@@ -1543,6 +1542,18 @@ if (contextGame) {
       studyPanel.scrollTop = currentPanelScrollPosition;
       contextGameAnswer.focus({ preventScroll: true });
     });
+}
+
+if (contextGameSubmit) {
+  contextGameSubmit.addEventListener('click', checkContextAnswer);
+}
+
+if (contextGameAnswer) {
+  contextGameAnswer.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      checkContextAnswer();
+    }
   });
 }
 

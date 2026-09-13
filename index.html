@@ -169,7 +169,7 @@
         <button id="begin-study-btn" class="primary hidden" type="button">Study Flashcards</button>
         <button id="context-game-start-btn" class="secondary hidden" type="button">Write the Context Word</button>
 
-        <form id="context-game" class="context-game hidden">
+        <div id="context-game" class="context-game hidden">
           <p class="game-kicker">Write the word from the context</p>
           <h3 id="context-game-meaning"></h3>
           <p id="context-game-phrase" class="context-game-phrase"></p>
@@ -178,9 +178,9 @@
           <label for="context-game-answer">Type the Ukrainian word</label>
           <div class="context-answer-row">
             <input id="context-game-answer" type="text" lang="uk-UA" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" required />
-            <button id="context-game-submit" type="submit">Check answer</button>
+            <button id="context-game-submit" type="button">Check answer</button>
           </div>
-        </form>
+        </div>
 
         <div id="flashcard" class="flashcard" aria-live="polite">
           <div class="card-side front-side">
