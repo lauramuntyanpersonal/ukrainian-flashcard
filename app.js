@@ -530,7 +530,7 @@ function renderSetList() {
   setList.innerHTML = sets
     .map((set) => `
       <div class="set-item" data-set-id="${set.id}">
-        <div class="set-delete-swipe" data-set-id="${set.id}">Delete</div>
+        <div class="set-delete-action" data-set-id="${set.id}">Delete</div>
         <button type="button" class="set-item-main" data-set-id="${set.id}">
           <div class="set-item-copy">
             <strong>${set.name}</strong>
@@ -542,10 +542,17 @@ function renderSetList() {
     .join('');
 
   setList.querySelectorAll('.set-item-main').forEach((button) => {
-    button.addEventListener('click', () => openSet(button.dataset.setId));
+    button.addEventListener('click', () => {
+      const row = button.closest('.set-item');
+      if (row && row.classList.contains('is-swiped')) {
+        row.classList.remove('is-swiped');
+        return;
+      }
+      openSet(button.dataset.setId);
+    });
   });
 
-  setList.querySelectorAll('.set-delete-swipe').forEach((button) => {
+  setList.querySelectorAll('.set-delete-action').forEach((button) => {
     button.addEventListener('click', (event) => {
       event.stopPropagation();
       deleteSetById(button.dataset.setId);
@@ -554,51 +561,75 @@ function renderSetList() {
 
   setList.querySelectorAll('.set-item').forEach((row) => {
     let startX = 0;
-    let startOffset = 0;
-    let dragging = false;
+    let currentX = 0;
+    let isDragging = false;
+    const maxOffset = 96;
+
+    const applyOffset = (offset) => {
+      const clamped = Math.max(-maxOffset, Math.min(0, offset));
+      row.querySelector('.set-item-main').style.transform = `translateX(${clamped}px)`;
+    };
+
+    const resetSwipe = () => {
+      row.classList.remove('is-swiped');
+      applyOffset(0);
+      isDragging = false;
+    };
 
     row.addEventListener('pointerdown', (event) => {
       startX = event.clientX;
-      startOffset = 0;
-      dragging = true;
+      currentX = event.clientX;
+      isDragging = true;
       row.setPointerCapture(event.pointerId);
     });
 
     row.addEventListener('pointermove', (event) => {
-      if (!dragging) return;
-      const deltaX = event.clientX - startX;
-      if (deltaX < 0) {
-        const offset = Math.max(deltaX, -90);
-        row.style.transform = `translateX(${offset}px)`;
-        startOffset = offset;
+      if (!isDragging) return;
+      const delta = event.clientX - startX;
+      currentX = event.clientX;
+      const isAlreadySwiped = row.classList.contains('is-swiped');
+
+      if (delta < 0) {
+        const offset = Math.max(delta, -maxOffset);
+        applyOffset(isAlreadySwiped ? Math.min(offset, 0) : offset);
+      } else if (isAlreadySwiped) {
+        const offset = Math.min(delta, 0);
+        applyOffset(offset);
       }
     });
 
-    function resetRow() {
-      dragging = false;
-      row.style.transform = '';
-      startOffset = 0;
-    }
+    row.addEventListener('pointerup', () => {
+      if (!isDragging) return;
 
-    row.addEventListener('pointerup', (event) => {
-      if (startOffset <= -70) {
-        event.stopPropagation();
-        deleteSetById(row.dataset.setId);
+      const delta = currentX - startX;
+      if (delta <= -52) {
+        row.classList.add('is-swiped');
+        applyOffset(-maxOffset);
+      } else if (delta >= 48 && row.classList.contains('is-swiped')) {
+        resetSwipe();
       } else {
-        resetRow();
+        if (row.classList.contains('is-swiped')) {
+          applyOffset(-maxOffset);
+        } else {
+          resetSwipe();
+        }
       }
+      isDragging = false;
     });
 
     row.addEventListener('pointerleave', () => {
-      if (!dragging) return;
-      if (startOffset <= -70) {
-        deleteSetById(row.dataset.setId);
+      if (!isDragging) return;
+      const delta = currentX - startX;
+      if (delta <= -52) {
+        row.classList.add('is-swiped');
+        applyOffset(-maxOffset);
       } else {
-        resetRow();
+        resetSwipe();
       }
+      isDragging = false;
     });
 
-    row.addEventListener('pointercancel', resetRow);
+    row.addEventListener('pointercancel', resetSwipe);
   });
 }
 

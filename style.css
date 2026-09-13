@@ -293,7 +293,6 @@ button.mini {
   min-height: 72px;
   overflow: hidden;
   border-radius: 14px;
-  transition: transform 0.15s ease;
   touch-action: pan-y;
 }
 
@@ -311,6 +310,8 @@ button.mini {
   padding: 14px 16px;
   border-radius: 14px;
   text-align: left;
+  transform: translateX(0);
+  transition: transform 0.18s ease;
 }
 
 .set-item-copy {
@@ -328,9 +329,11 @@ button.mini {
   margin-top: 4px;
 }
 
-.set-delete-swipe {
+.set-delete-action {
   position: absolute;
-  inset: 0 0 0 auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
   width: 96px;
   display: flex;
   align-items: center;
@@ -339,6 +342,16 @@ button.mini {
   color: white;
   font-weight: 700;
   border-radius: 14px;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: transform 0.18s ease, opacity 0.18s ease;
+  pointer-events: none;
+}
+
+.set-item.is-swiped .set-delete-action {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
 }
 
 .username-modal {
