@@ -162,14 +162,31 @@ async function syncUserDataToCloud() {
   if (!cfg || username === 'default') return null;
 
   try {
-    const payload = {
-      username,
-      data: {
-        words: readWordBank(),
-        sets: readSets(),
+    let remoteData = { words: [], sets: [] };
+    const remoteResponse = await fetch(`${cfg.supabaseUrl}/rest/v1/flashcards_users?username=eq.${encodeURIComponent(username)}&select=data`, {
+      headers: {
+        apikey: cfg.supabaseAnonKey,
+        Authorization: `Bearer ${cfg.supabaseAnonKey}`,
+        Accept: 'application/json',
       },
+    });
+
+    if (remoteResponse.ok) {
+      const remoteRows = await remoteResponse.json();
+      const remoteEntry = Array.isArray(remoteRows) && remoteRows.length ? remoteRows[0] : null;
+      if (remoteEntry && remoteEntry.data) {
+        remoteData = remoteEntry.data;
+      }
+    }
+
+    const localWords = readWordBank();
+    const localSets = readSets();
+    const mergedData = {
+      words: mergeUniqueWordEntries(remoteData.words || [], localWords),
+      sets: mergeUniqueSets(remoteData.sets || [], localSets),
     };
 
+    const payload = { username, data: mergedData };
     const response = await fetch(`${cfg.supabaseUrl}/rest/v1/flashcards_users?on_conflict=username`, {
       method: 'POST',
       headers: {
@@ -185,7 +202,7 @@ async function syncUserDataToCloud() {
       return null;
     }
 
-    return payload.data;
+    return mergedData;
   } catch (error) {
     return null;
   }
@@ -235,12 +252,12 @@ function saveWordBank(words) {
   }
 }
 
-function mergeWordBank(items) {
-  const existing = readWordBank();
-  const combined = [...existing, ...items];
+function mergeUniqueWordEntries(existingItems, incomingItems) {
+  const combined = [...(Array.isArray(existingItems) ? existingItems : []), ...(Array.isArray(incomingItems) ? incomingItems : [])];
   const seen = new Set();
 
-  const merged = combined.filter((item) => {
+  return combined.filter((item) => {
+    if (!item || typeof item !== 'object') return false;
     const signature = [
       item.front || '',
       item.back || '',
@@ -253,7 +270,38 @@ function mergeWordBank(items) {
     seen.add(signature);
     return true;
   });
+}
 
+function mergeUniqueSets(existingSets, incomingSets) {
+  const map = new Map();
+  const combined = [...(Array.isArray(existingSets) ? existingSets : []), ...(Array.isArray(incomingSets) ? incomingSets : [])];
+
+  combined.forEach((set) => {
+    if (!set || typeof set !== 'object') return;
+    const id = set.id || set.name || `${Date.now()}-${Math.random()}`;
+    const existing = map.get(id);
+
+    if (!existing) {
+      map.set(id, {
+        ...set,
+        cards: Array.isArray(set.cards) ? [...set.cards] : [],
+      });
+      return;
+    }
+
+    const mergedCards = mergeUniqueWordEntries(existing.cards || [], set.cards || []);
+    map.set(id, {
+      ...existing,
+      ...set,
+      cards: mergedCards,
+    });
+  });
+
+  return [...map.values()];
+}
+
+function mergeWordBank(items) {
+  const merged = mergeUniqueWordEntries(readWordBank(), items);
   saveWordBank(merged);
   return merged;
 }
