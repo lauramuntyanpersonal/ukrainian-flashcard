@@ -16,11 +16,11 @@ const wordsList = document.getElementById('words-list');
 const addSetButton = document.getElementById('add-set-button');
 const setBuilder = document.getElementById('set-builder');
 const setBuilderList = document.getElementById('set-builder-list');
-const selectedSetNameInput = document.getElementById('selected-set-name-input');
-const chunkedSetNameInput = document.getElementById('chunked-set-name-input');
+const setNameInput = document.getElementById('set-name-input');
+const chunkSetCheckbox = document.getElementById('chunk-set-checkbox');
+const chunkSizeRow = document.getElementById('chunk-size-row');
 const setSizeInput = document.getElementById('set-size-input');
 const createSetFromWordBankButton = document.getElementById('create-set-from-word-bank');
-const createChunkedSetsButton = document.getElementById('create-chunked-sets');
 const app = document.getElementById('app');
 const studyPanel = document.getElementById('study-panel');
 const flashcard = document.getElementById('flashcard');
@@ -658,16 +658,35 @@ function deleteSetById(setId) {
   showStatus('Set deleted.', 'success');
 }
 
+function getWordKey(word) {
+  if (!word || typeof word !== 'object') return '';
+  return word.id || [word.front || '', word.back || '', word.phrase || '', word.note || ''].join('|');
+}
+
+function getUnassignedWords() {
+  const words = readWordBank();
+  const assignedKeys = new Set();
+
+  readSets().forEach((set) => {
+    (Array.isArray(set.cards) ? set.cards : []).forEach((card) => {
+      const cardKey = getWordKey(card);
+      if (cardKey) assignedKeys.add(cardKey);
+    });
+  });
+
+  return words.filter((word) => {
+    const key = getWordKey(word);
+    return key && !assignedKeys.has(key);
+  });
+}
+
 function getWordMembershipInfo(word) {
   const sets = readSets();
-  const wordKey = word?.id || [word?.front || '', word?.back || '', word?.phrase || '', word?.note || ''].join('|');
+  const wordKey = getWordKey(word);
 
   const matchingSets = sets.filter((set) => {
     const cards = Array.isArray(set.cards) ? set.cards : [];
-    return cards.some((card) => {
-      const cardKey = card?.id || [card?.front || '', card?.back || '', card?.phrase || '', card?.note || ''].join('|');
-      return cardKey === wordKey;
-    });
+    return cards.some((card) => getWordKey(card) === wordKey);
   });
 
   return matchingSets.map((set) => set.name);
@@ -862,7 +881,22 @@ function chunkWords(items, chunkSize) {
   return chunks;
 }
 
+function updateSetBuilderMode() {
+  const isChunked = Boolean(chunkSetCheckbox && chunkSetCheckbox.checked);
+  if (chunkSizeRow) {
+    chunkSizeRow.classList.toggle('hidden', !isChunked);
+  }
+  if (setNameInput) {
+    setNameInput.placeholder = isChunked ? 'Base name for chunked sets' : 'Name this set';
+  }
+}
+
 function createSetFromWordBank() {
+  if (chunkSetCheckbox && chunkSetCheckbox.checked) {
+    createChunkedSetsFromWordBank();
+    return;
+  }
+
   const words = readWordBank();
   const selected = [...selectedWordIndexes].map((index) => words[index]).filter(Boolean);
 
@@ -871,7 +905,7 @@ function createSetFromWordBank() {
     return;
   }
 
-  const name = (selectedSetNameInput ? selectedSetNameInput.value.trim() : '').replace(/\s+/g, ' ');
+  const name = (setNameInput ? setNameInput.value.trim() : '').replace(/\s+/g, ' ');
   const finalName = name || `Custom set ${readSets().length + 1}`;
 
   const newSet = {
@@ -883,7 +917,7 @@ function createSetFromWordBank() {
 
   const nextSets = [newSet, ...readSets()];
   saveSets(nextSets);
-  if (selectedSetNameInput) selectedSetNameInput.value = '';
+  if (setNameInput) setNameInput.value = '';
   selectedWordIndexes.clear();
   if (setBuilder) setBuilder.classList.add('hidden');
   renderSetBuilderList();
@@ -894,18 +928,21 @@ function createSetFromWordBank() {
 
 function createChunkedSetsFromWordBank() {
   const words = readWordBank();
+  const unassignedWords = getUnassignedWords();
   const selected = [...selectedWordIndexes].map((index) => words[index]).filter(Boolean);
-  const sourceWords = selected.length ? selected : words;
+  const eligibleWords = selected.length
+    ? selected.filter((word) => unassignedWords.some((candidate) => getWordKey(candidate) === getWordKey(word)))
+    : unassignedWords;
 
-  if (!sourceWords.length) {
-    showStatus('Add some words before creating chunked sets.', 'error');
+  if (!eligibleWords.length) {
+    showStatus('There are no unassigned words left to chunk into sets.', 'error');
     return;
   }
 
   const chunkSizeValue = Number(setSizeInput ? setSizeInput.value : 50);
   const chunkSize = Number.isFinite(chunkSizeValue) && chunkSizeValue > 0 ? Math.min(500, Math.floor(chunkSizeValue)) : 50;
-  const baseName = (chunkedSetNameInput ? chunkedSetNameInput.value.trim() : '').replace(/\s+/g, ' ') || 'Chunked set';
-  const chunks = chunkWords(sourceWords, chunkSize);
+  const baseName = (setNameInput ? setNameInput.value.trim() : '').replace(/\s+/g, ' ') || 'Chunked set';
+  const chunks = chunkWords(eligibleWords, chunkSize);
 
   const builtSets = chunks.map((chunk, index) => ({
     id: toId(`${baseName} ${index + 1}`),
@@ -918,25 +955,26 @@ function createChunkedSetsFromWordBank() {
   const nextSets = [...builtSets, ...readSets()];
   saveSets(nextSets);
 
-  if (chunkedSetNameInput) chunkedSetNameInput.value = '';
+  if (setNameInput) setNameInput.value = '';
   if (setSizeInput) setSizeInput.value = String(chunkSize);
   selectedWordIndexes.clear();
   if (setBuilder) setBuilder.classList.add('hidden');
   renderSetBuilderList();
   renderSetList();
   renderWordList();
-  showStatus(`Created ${builtSets.length} set${builtSets.length === 1 ? '' : 's'} from ${sourceWords.length} words.`, 'success');
+  showStatus(`Created ${builtSets.length} set${builtSets.length === 1 ? '' : 's'} from ${eligibleWords.length} unassigned words.`, 'success');
 }
 
 function toggleSetBuilder() {
   if (!setBuilder) return;
   const isHidden = setBuilder.classList.toggle('hidden');
-  if (!isHidden && selectedSetNameInput) {
-    selectedSetNameInput.focus();
+  if (!isHidden && setNameInput) {
+    setNameInput.focus();
   }
   if (!setBuilder.classList.contains('hidden')) {
     renderSetBuilderList();
   }
+  updateSetBuilderMode();
 }
 
 function showStatus(message, kind = '') {
@@ -1390,8 +1428,8 @@ if (createSetFromWordBankButton) {
   createSetFromWordBankButton.addEventListener('click', createSetFromWordBank);
 }
 
-if (createChunkedSetsButton) {
-  createChunkedSetsButton.addEventListener('click', createChunkedSetsFromWordBank);
+if (chunkSetCheckbox) {
+  chunkSetCheckbox.addEventListener('change', updateSetBuilderMode);
 }
 
 if (setBuilderList) {

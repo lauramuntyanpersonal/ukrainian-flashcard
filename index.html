@@ -93,28 +93,27 @@
 
           <div id="set-builder" class="set-builder hidden">
             <div class="set-builder-mode">
-              <h3>Selected set</h3>
-              <label for="selected-set-name-input">
+              <label for="set-name-input">
                 <span>Set name</span>
               </label>
-              <input id="selected-set-name-input" type="text" maxlength="40" placeholder="Name this selected set" />
-              <button id="create-set-from-word-bank" type="button">Create selected set</button>
+              <input id="set-name-input" type="text" maxlength="40" placeholder="Name this set" />
+
+              <label class="checkbox-row" for="chunk-set-checkbox">
+                <input id="chunk-set-checkbox" type="checkbox" />
+                <span>Chunk set</span>
+              </label>
+
+              <div id="chunk-size-row" class="chunk-size-row hidden">
+                <label for="set-size-input">
+                  <span>Words per set</span>
+                </label>
+                <input id="set-size-input" type="number" min="1" max="500" value="50" placeholder="50" />
+              </div>
+
+              <button id="create-set-from-word-bank" type="button">Create set</button>
             </div>
 
-            <div class="set-builder-mode">
-              <h3>Chunked sets</h3>
-              <label for="chunked-set-name-input">
-                <span>Base name</span>
-              </label>
-              <input id="chunked-set-name-input" type="text" maxlength="40" placeholder="e.g. Daily practice" />
-              <label for="set-size-input">
-                <span>Words per set</span>
-              </label>
-              <input id="set-size-input" type="number" min="1" max="500" value="50" placeholder="50" />
-              <button id="create-chunked-sets" class="secondary" type="button">Create chunked sets</button>
-            </div>
-
-            <p class="helper-text compact">Select specific words for one custom set, or leave them unselected to split the whole word bank into equal-sized chunks.</p>
+            <p class="helper-text compact">Leave the box unchecked to choose the words for one set. Tick it to split the selected or unassigned words into equal-sized chunks.</p>
             <div id="set-builder-list" class="set-builder-list"></div>
           </div>
 
