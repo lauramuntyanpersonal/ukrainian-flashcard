@@ -30,6 +30,7 @@ const backButton = document.getElementById('back-button');
 const navBackButton = document.getElementById('nav-back-button');
 const deleteCardButton = document.getElementById('delete-card-btn');
 const beginStudyButton = document.getElementById('begin-study-btn');
+const studySetHeaderButton = document.getElementById('study-set-header-button');
 const setReviewList = document.getElementById('set-review-list');
 const studyActions = document.querySelector('.study-actions');
 const studyFooter = document.querySelector('.study-footer');
@@ -1143,6 +1144,7 @@ function showMainView() {
   app.classList.remove('hidden');
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
+  if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
   if (studyActions) studyActions.classList.remove('hidden');
   if (studyFooter) studyFooter.classList.remove('hidden');
@@ -1175,6 +1177,7 @@ function showSetReviewMode() {
     renderSetReviewList();
   }
   if (beginStudyButton) beginStudyButton.classList.remove('hidden');
+  if (studySetHeaderButton) studySetHeaderButton.classList.remove('hidden');
   if (flashcard) flashcard.classList.add('hidden');
   if (studyActions) studyActions.classList.add('hidden');
   if (studyFooter) studyFooter.classList.add('hidden');
@@ -1376,6 +1379,10 @@ if (deleteCardButton) {
 
 if (beginStudyButton) {
   beginStudyButton.addEventListener('click', beginStudySession);
+}
+
+if (studySetHeaderButton) {
+  studySetHeaderButton.addEventListener('click', beginStudySession);
 }
 
 function setActiveTab(selectedTab) {
