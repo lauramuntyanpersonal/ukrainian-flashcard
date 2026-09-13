@@ -866,6 +866,17 @@ button.mini {
   margin: 0;
 }
 
+.context-answer-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.context-answer-row button {
+  white-space: nowrap;
+}
+
 .context-game #context-game-next.hidden {
   display: none !important;
 }
