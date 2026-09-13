@@ -765,10 +765,12 @@ button.mini {
   inset: 0;
   z-index: 20;
   width: min(100%, 440px);
-  height: 100dvh;
-  min-height: 0;
+  height: 100svh;
+  min-height: 100svh;
   margin: 0 auto;
-  overflow-y: auto;
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  overflow: hidden;
   overscroll-behavior: none;
 }
 
