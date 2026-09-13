@@ -1157,6 +1157,7 @@ function openSet(setId) {
 
 function showMainView() {
   studyPanel.classList.add('hidden');
+  studyPanel.classList.remove('context-writing-active');
   app.classList.remove('hidden');
   if (accountButton) accountButton.classList.remove('hidden');
   if (appUpdateButton) appUpdateButton.classList.remove('hidden');
@@ -1214,6 +1215,7 @@ function showStudyOptions() {
 }
 
 function beginStudySession() {
+  studyPanel.classList.remove('context-writing-active');
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
@@ -1244,6 +1246,7 @@ function renderContextGameCard() {
 
 function startContextWritingGame() {
   if (!currentCards.length) return;
+  studyPanel.classList.add('context-writing-active');
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
@@ -1574,6 +1577,7 @@ function setActiveTab(selectedTab) {
 function showHomeScreen() {
   app.classList.remove('hidden');
   studyPanel.classList.add('hidden');
+  studyPanel.classList.remove('context-writing-active');
   if (accountButton) accountButton.classList.remove('hidden');
   if (appUpdateButton) appUpdateButton.classList.remove('hidden');
   if (studySettingsMenu) studySettingsMenu.classList.add('hidden');

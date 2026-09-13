@@ -760,6 +760,18 @@ button.mini {
   padding-bottom: 32px;
 }
 
+.study-panel.context-writing-active {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  width: min(100%, 440px);
+  height: 100dvh;
+  min-height: 0;
+  margin: 0 auto;
+  overflow-y: auto;
+  overscroll-behavior: none;
+}
+
 .set-review-list {
   display: grid;
   gap: 10px;
