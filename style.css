@@ -110,6 +110,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 8px;
 }
@@ -816,6 +817,45 @@ button.mini {
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--panel-alt);
+  position: relative;
+}
+
+.context-results-reveal {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  transition: left 0.2s ease;
+}
+
+.context-game.results-revealed .context-results-reveal {
+  left: calc(100% - 94px);
+}
+
+.context-results {
+  display: grid;
+  gap: 10px;
+  margin: auto 0;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--panel-alt);
+}
+
+.context-results.hidden {
+  display: none;
+}
+
+.context-results h3,
+.context-results p {
+  margin-bottom: 0;
+}
+
+.context-results-mistakes {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
 }
 
 .study-panel.context-writing-active .context-game {

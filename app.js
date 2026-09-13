@@ -1,6 +1,7 @@
 const STORAGE_KEY = 'ukrainian-flashcards-sets-v1';
 const WORD_BANK_KEY = 'ukrainian-flashcards-word-bank-v1';
 const USERNAME_KEY = 'ukrainian-flashcards-username-v1';
+const CONTEXT_PROGRESS_KEY = 'ukrainian-flashcards-context-progress-v1';
 
 const demoSets = [];
 
@@ -44,6 +45,11 @@ const contextGameAnswer = document.getElementById('context-game-answer');
 const contextGameSubmit = document.getElementById('context-game-submit');
 const contextGameFeedback = document.getElementById('context-game-feedback');
 const contextGameNext = document.getElementById('context-game-next');
+const contextResultsReveal = document.getElementById('context-results-reveal');
+const contextResults = document.getElementById('context-results');
+const contextResultsScore = document.getElementById('context-results-score');
+const contextResultsMistakes = document.getElementById('context-results-mistakes');
+const contextResultsContinue = document.getElementById('context-results-continue');
 const studyActions = document.querySelector('.study-actions');
 const studyFooter = document.querySelector('.study-footer');
 const tabButtons = document.querySelectorAll('.tab-button');
@@ -84,6 +90,23 @@ let isDraggingWordSelection = false;
 let draggingSelectionMode = true;
 let activeAudio = null;
 let contextInitialViewportHeight = null;
+let contextProgress = null;
+
+function readContextProgress() {
+  try {
+    const allProgress = JSON.parse(localStorage.getItem(getScopedKey(CONTEXT_PROGRESS_KEY)) || '{}');
+    return allProgress && typeof allProgress === 'object' ? allProgress : {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function saveContextProgress() {
+  localStorage.setItem(getScopedKey(CONTEXT_PROGRESS_KEY), JSON.stringify({
+    ...readContextProgress(),
+    [currentSetId]: contextProgress,
+  }));
+}
 
 function toId(value) {
   return `${value.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-` + Date.now().toString(36);
@@ -1170,6 +1193,8 @@ function showMainView() {
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
+  if (contextResults) contextResults.classList.add('hidden');
+  if (contextResults) contextResults.classList.add('hidden');
   if (studyTitle) studyTitle.classList.remove('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
   if (studyActions) studyActions.classList.remove('hidden');
@@ -1210,6 +1235,24 @@ function showSetReviewMode() {
   if (studyFooter) studyFooter.classList.add('hidden');
 }
 
+function renderContextResults() {
+  const total = currentCards.length;
+  const correct = contextProgress?.correct || 0;
+  const mistakes = Object.values(contextProgress?.mistakes || {})
+    .sort((a, b) => b.count - a.count);
+
+  contextResultsScore.textContent = `${correct} correct out of ${total} words`;
+  contextResultsMistakes.innerHTML = mistakes.length
+    ? `<strong>Most common mistakes</strong>${mistakes.slice(0, 5).map((mistake) => `<span>${mistake.front} - ${mistake.back}: ${mistake.count} mistake${mistake.count === 1 ? '' : 's'}</span>`).join('')}`
+    : '<span>No mistakes recorded yet.</span>';
+}
+
+function showContextResults() {
+  if (contextGame) contextGame.classList.add('hidden');
+  if (contextResults) contextResults.classList.remove('hidden');
+  renderContextResults();
+}
+
 function showStudyOptions() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
@@ -1226,6 +1269,7 @@ function beginStudySession() {
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (studyTitle) studyTitle.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
+  if (contextResults) contextResults.classList.add('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
   if (studyActions) studyActions.classList.remove('hidden');
   if (studyFooter) studyFooter.classList.remove('hidden');
@@ -1261,7 +1305,14 @@ function startContextWritingGame() {
   if (studyActions) studyActions.classList.add('hidden');
   if (studyFooter) studyFooter.classList.add('hidden');
   if (contextGame) contextGame.classList.remove('hidden');
+  if (contextResults) contextResults.classList.add('hidden');
+  contextGame.classList.remove('results-revealed');
+  const savedProgress = readContextProgress()[currentSetId];
+  contextProgress = savedProgress && !savedProgress.complete
+    ? savedProgress
+    : { index: 0, correct: 0, attempts: 0, mistakes: {}, complete: false };
   currentIndex = 0;
+  currentIndex = Math.min(contextProgress.index || 0, Math.max(currentCards.length - 1, 0));
   renderContextGameCard();
 }
 
@@ -1277,7 +1328,16 @@ function updateContextKeyboardLayout() {
 function advanceContextGame() {
   const currentScrollPosition = window.scrollY;
   const currentPanelScrollPosition = studyPanel.scrollTop;
+  if (currentIndex >= currentCards.length - 1) {
+    contextProgress.complete = true;
+    contextProgress.index = currentCards.length;
+    saveContextProgress();
+    showContextResults();
+    return;
+  }
   currentIndex = (currentIndex + 1) % currentCards.length;
+  contextProgress.index = currentIndex;
+  saveContextProgress();
   renderContextGameCard();
   window.scrollTo(0, currentScrollPosition);
   studyPanel.scrollTop = currentPanelScrollPosition;
@@ -1544,6 +1604,16 @@ function checkContextAnswer() {
     if (!card) return;
 
     const isCorrect = normalizeAnswer(contextGameAnswer.value) === normalizeAnswer(card.front);
+    contextProgress.attempts = (contextProgress.attempts || 0) + 1;
+    if (isCorrect) {
+      contextProgress.correct = (contextProgress.correct || 0) + 1;
+    } else {
+      const mistakeKey = card.id || card.front;
+      const existingMistake = contextProgress.mistakes[mistakeKey] || { front: card.front, back: card.back, count: 0 };
+      existingMistake.count += 1;
+      contextProgress.mistakes[mistakeKey] = existingMistake;
+    }
+    saveContextProgress();
     contextGameFeedback.textContent = isCorrect
       ? 'Correct!'
       : `Not quite. The word is ${card.front}.`;
@@ -1581,6 +1651,39 @@ if (window.visualViewport) {
 
 if (contextGameNext) {
   contextGameNext.addEventListener('click', advanceContextGame);
+}
+
+if (contextResultsReveal) {
+  let contextSwipeStartX = null;
+
+  contextGame.addEventListener('pointerdown', (event) => {
+    contextSwipeStartX = event.clientX;
+  });
+
+  contextGame.addEventListener('pointerup', (event) => {
+    if (contextSwipeStartX === null) return;
+    const delta = event.clientX - contextSwipeStartX;
+    contextSwipeStartX = null;
+    if (delta < -48) {
+      contextGame.classList.add('results-revealed');
+    } else if (delta > 48) {
+      contextGame.classList.remove('results-revealed');
+    }
+  });
+
+  contextResultsReveal.addEventListener('click', showContextResults);
+}
+
+if (contextResultsContinue) {
+  contextResultsContinue.addEventListener('click', () => {
+    contextProgress.complete = false;
+    contextProgress.index = 0;
+    saveContextProgress();
+    contextResults.classList.add('hidden');
+    contextGame.classList.remove('hidden', 'results-revealed');
+    currentIndex = 0;
+    renderContextGameCard();
+  });
 }
 
 if (studySetHeaderButton) {
