@@ -83,6 +83,7 @@ let selectedWordIndexes = new Set();
 let isDraggingWordSelection = false;
 let draggingSelectionMode = true;
 let activeAudio = null;
+let contextInitialViewportHeight = null;
 
 function toId(value) {
   return `${value.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-` + Date.now().toString(36);
@@ -1251,6 +1252,7 @@ function startContextWritingGame() {
   if (!currentCards.length) return;
   studyPanel.classList.add('context-writing-active');
   studyPanel.classList.remove('keyboard-visible');
+  contextInitialViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
@@ -1267,7 +1269,8 @@ function updateContextKeyboardLayout() {
   if (!studyPanel.classList.contains('context-writing-active')) return;
 
   const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-  const keyboardVisible = window.innerHeight - viewportHeight > 120;
+  const keyboardVisible = contextInitialViewportHeight !== null
+    && contextInitialViewportHeight - viewportHeight > 120;
   studyPanel.classList.toggle('keyboard-visible', keyboardVisible);
 }
 
@@ -1561,7 +1564,10 @@ if (contextGameAnswer) {
     }
   });
 
-  contextGameAnswer.addEventListener('focus', updateContextKeyboardLayout);
+  contextGameAnswer.addEventListener('focus', () => {
+    updateContextKeyboardLayout();
+    window.setTimeout(updateContextKeyboardLayout, 250);
+  });
   contextGameAnswer.addEventListener('blur', () => {
     if (!window.visualViewport) {
       studyPanel.classList.remove('keyboard-visible');
