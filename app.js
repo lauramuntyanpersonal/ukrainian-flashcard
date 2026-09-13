@@ -518,11 +518,13 @@ function renderWordList() {
     .map((word, index) => `
       <div class="word-row" data-word-index="${index}">
         <button type="button" class="word-delete-action" data-word-index="${index}" aria-label="Delete word ${word.front || 'word'}">Delete</button>
-        <div class="word-main" data-word-index="${index}">
-          <strong>${word.front || 'Untitled word'}</strong>
-          <span>${word.back || word.phrase || word.note || 'No definition yet'}</span>
+        <div class="word-content" data-word-index="${index}">
+          <div class="word-main">
+            <strong>${word.front || 'Untitled word'}</strong>
+            <span>${word.back || word.phrase || word.note || 'No definition yet'}</span>
+          </div>
+          ${word.phrase ? `<small class="word-phrase">${word.phrase}</small>` : ''}
         </div>
-        ${word.phrase ? `<small class="word-phrase">${word.phrase}</small>` : ''}
       </div>
     `)
     .join('');
@@ -542,7 +544,10 @@ function renderWordList() {
 
     const applyOffset = (offset) => {
       const clamped = Math.max(-maxOffset, Math.min(0, offset));
-      row.querySelector('.word-main').style.transform = `translateX(${clamped}px)`;
+      const content = row.querySelector('.word-content');
+      if (content) {
+        content.style.transform = `translateX(${clamped}px)`;
+      }
     };
 
     const resetSwipe = () => {
