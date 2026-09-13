@@ -877,6 +877,12 @@ button.mini {
   white-space: nowrap;
 }
 
+.context-submit-button {
+  min-width: 48px;
+  padding-inline: 14px;
+  font-size: 1.2rem;
+}
+
 .context-game #context-game-next.hidden {
   display: none !important;
 }
