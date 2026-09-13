@@ -1246,6 +1246,9 @@ function startContextWritingGame() {
   if (contextGame) contextGame.classList.remove('hidden');
   currentIndex = 0;
   renderContextGameCard();
+  requestAnimationFrame(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight);
+  });
 }
 
 function advanceContextGame() {
