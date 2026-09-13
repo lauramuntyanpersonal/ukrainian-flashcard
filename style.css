@@ -166,11 +166,29 @@ input {
   gap: 16px;
 }
 
-label {
+.add-word-form label,
+.set-builder-mode label,
+.username-card label,
+.selection-row,
+.checkbox-row {
   display: grid;
   gap: 8px;
   font-weight: 600;
   color: var(--text);
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-weight: 600;
+}
+
+.checkbox-row input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
 }
 
 input[type="text"], input[type="file"] {
@@ -302,10 +320,22 @@ button.mini {
   background: white;
   color: var(--text);
   padding: 12px 14px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
   touch-action: pan-y;
+}
+
+.word-select-row input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.word-select-row > div {
+  display: grid;
+  gap: 4px;
 }
 
 .word-select-row.selected {
@@ -321,7 +351,6 @@ button.mini {
 
 .word-select-row small {
   color: var(--muted);
-  margin-top: 4px;
 }
 
 .word-set-status {
