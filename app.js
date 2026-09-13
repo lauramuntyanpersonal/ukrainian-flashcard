@@ -1145,6 +1145,7 @@ function openSet(setId) {
   if (navBackButton) {
     navBackButton.classList.remove('hidden');
   }
+  window.scrollTo(0, 0);
   studyTitle.textContent = set.name;
   showSetReviewMode();
 }
@@ -1246,9 +1247,6 @@ function startContextWritingGame() {
   if (contextGame) contextGame.classList.remove('hidden');
   currentIndex = 0;
   renderContextGameCard();
-  requestAnimationFrame(() => {
-    contextGame?.scrollIntoView({ block: 'start', behavior: 'auto' });
-  });
 }
 
 function advanceContextGame() {
