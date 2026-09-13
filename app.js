@@ -1070,17 +1070,44 @@ refreshWordsButton.addEventListener('click', () => {
   showStatus('Word list refreshed.', 'success');
 });
 
+function applyWordInputKeyboardHints() {
+  if (addWordFrontInput) {
+    addWordFrontInput.setAttribute('lang', 'uk-UA');
+    addWordFrontInput.setAttribute('inputmode', 'text');
+    addWordFrontInput.setAttribute('autocapitalize', 'none');
+    addWordFrontInput.setAttribute('autocorrect', 'off');
+  }
+
+  if (addWordBackInput) {
+    addWordBackInput.setAttribute('lang', 'en-US');
+    addWordBackInput.setAttribute('inputmode', 'latin');
+    addWordBackInput.setAttribute('autocapitalize', 'sentences');
+    addWordBackInput.setAttribute('autocorrect', 'on');
+  }
+
+  if (addWordPhraseInput) {
+    addWordPhraseInput.setAttribute('lang', 'uk-UA');
+    addWordPhraseInput.setAttribute('inputmode', 'text');
+    addWordPhraseInput.setAttribute('autocapitalize', 'sentences');
+    addWordPhraseInput.setAttribute('autocorrect', 'off');
+  }
+}
+
 if (toggleAddWordFormButton && addWordForm) {
   toggleAddWordFormButton.addEventListener('click', () => {
     const isHidden = addWordForm.classList.toggle('hidden');
     toggleAddWordFormButton.textContent = isHidden ? 'Add word' : 'Close';
-    if (!isHidden && addWordFrontInput) {
-      addWordFrontInput.focus();
+    if (!isHidden) {
+      applyWordInputKeyboardHints();
+      if (addWordFrontInput) {
+        addWordFrontInput.focus();
+      }
     }
   });
 }
 
 if (addWordForm) {
+  applyWordInputKeyboardHints();
   addWordForm.addEventListener('submit', (event) => {
     event.preventDefault();
 
