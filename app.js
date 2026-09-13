@@ -1526,8 +1526,6 @@ if (contextGameStartButton) {
 }
 
 function checkContextAnswer() {
-    const currentScrollPosition = window.scrollY;
-    const currentPanelScrollPosition = studyPanel.scrollTop;
     const card = currentCards[currentIndex];
     if (!card) return;
 
@@ -1537,11 +1535,7 @@ function checkContextAnswer() {
       : `Not quite. The word is ${card.front}.`;
     contextGameFeedback.className = `status ${isCorrect ? 'success' : 'error'}`;
     contextGameNext.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      window.scrollTo(0, currentScrollPosition);
-      studyPanel.scrollTop = currentPanelScrollPosition;
-      contextGameAnswer.focus({ preventScroll: true });
-    });
+    contextGameAnswer.focus({ preventScroll: true });
 }
 
 if (contextGameSubmit) {

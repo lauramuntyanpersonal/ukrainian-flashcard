@@ -862,7 +862,7 @@ button.mini {
 }
 
 .context-game-feedback {
-  min-height: 0;
+  min-height: 24px;
   margin: 0;
 }
 
@@ -884,7 +884,8 @@ button.mini {
 }
 
 .context-game #context-game-next.hidden {
-  display: none !important;
+  display: block !important;
+  visibility: hidden;
 }
 
 .hidden {
