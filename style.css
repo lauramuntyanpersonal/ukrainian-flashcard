@@ -812,6 +812,16 @@ button.mini {
   background: var(--panel-alt);
 }
 
+.study-panel.context-writing-active .context-game {
+  margin-bottom: 28vh;
+}
+
+@media (min-width: 641px) {
+  .study-panel.context-writing-active .context-game {
+    margin-bottom: 120px;
+  }
+}
+
 .context-game h3 {
   min-height: 3em;
   margin-bottom: 0;
