@@ -156,8 +156,14 @@ async function syncUserDataFromCloud() {
     if (!rows || !rows.length) return null;
 
     const data = rows[0]?.data || { words: [], sets: [] };
-    localStorage.setItem(getScopedKey(WORD_BANK_KEY), JSON.stringify(Array.isArray(data.words) ? data.words : []));
-    localStorage.setItem(getScopedKey(STORAGE_KEY), JSON.stringify(Array.isArray(data.sets) ? data.sets : []));
+    const hasLocalWordData = !!localStorage.getItem(getScopedKey(WORD_BANK_KEY));
+    const hasLocalSetData = !!localStorage.getItem(getScopedKey(STORAGE_KEY));
+
+    if (!hasLocalWordData || !hasLocalSetData) {
+      localStorage.setItem(getScopedKey(WORD_BANK_KEY), JSON.stringify(Array.isArray(data.words) ? data.words : []));
+      localStorage.setItem(getScopedKey(STORAGE_KEY), JSON.stringify(Array.isArray(data.sets) ? data.sets : []));
+    }
+
     return data;
   } catch (error) {
     return null;
@@ -170,31 +176,16 @@ async function syncUserDataToCloud() {
   if (!cfg || username === 'default') return null;
 
   try {
-    let remoteData = { words: [], sets: [] };
-    const remoteResponse = await fetch(`${cfg.supabaseUrl}/rest/v1/flashcards_users?username=eq.${encodeURIComponent(username)}&select=data`, {
-      headers: {
-        apikey: cfg.supabaseAnonKey,
-        Authorization: `Bearer ${cfg.supabaseAnonKey}`,
-        Accept: 'application/json',
-      },
-    });
-
-    if (remoteResponse.ok) {
-      const remoteRows = await remoteResponse.json();
-      const remoteEntry = Array.isArray(remoteRows) && remoteRows.length ? remoteRows[0] : null;
-      if (remoteEntry && remoteEntry.data) {
-        remoteData = remoteEntry.data;
-      }
-    }
-
     const localWords = readWordBank();
     const localSets = readSets();
-    const mergedData = {
-      words: mergeUniqueWordEntries(remoteData.words || [], localWords),
-      sets: mergeUniqueSets(remoteData.sets || [], localSets),
+    const payload = {
+      username,
+      data: {
+        words: Array.isArray(localWords) ? localWords : [],
+        sets: Array.isArray(localSets) ? localSets : [],
+      },
     };
 
-    const payload = { username, data: mergedData };
     const response = await fetch(`${cfg.supabaseUrl}/rest/v1/flashcards_users?on_conflict=username`, {
       method: 'POST',
       headers: {
@@ -210,7 +201,7 @@ async function syncUserDataToCloud() {
       return null;
     }
 
-    return mergedData;
+    return payload.data;
   } catch (error) {
     return null;
   }
