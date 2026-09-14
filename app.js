@@ -82,6 +82,7 @@ const studyFooter = document.querySelector('.study-footer');
 const tabButtons = document.querySelectorAll('.tab-button');
 const tabPanels = document.querySelectorAll('.tab-panel');
 const refreshWordsButton = document.getElementById('refresh-words-button');
+const deleteAllWordsButton = document.getElementById('delete-all-words-button');
 const wordCountLabel = document.getElementById('word-count');
 const wordSortSelect = document.getElementById('word-sort-select');
 const setSortSelect = document.getElementById('set-sort-select');
@@ -659,6 +660,18 @@ function deleteWordByIndex(index) {
   saveWordBank(nextWords);
   renderWordList();
   showStatus('Word deleted.', 'success');
+}
+
+function deleteAllWords() {
+  if (!readWordBank().length) {
+    showStatus('There are no words to delete.');
+    return;
+  }
+
+  if (!window.confirm('Delete all words from your word bank? This cannot be undone.')) return;
+  saveWordBank([]);
+  renderWordList();
+  showStatus('All words deleted.', 'success');
 }
 
 function getWordSortPreference() {
@@ -2021,6 +2034,10 @@ refreshWordsButton.addEventListener('click', () => {
   renderWordList();
   showStatus('Word list refreshed.', 'success');
 });
+
+if (deleteAllWordsButton) {
+  deleteAllWordsButton.addEventListener('click', deleteAllWords);
+}
 
 if (wordSortSelect) {
   wordSortSelect.addEventListener('change', (event) => {

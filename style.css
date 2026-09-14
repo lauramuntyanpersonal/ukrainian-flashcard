@@ -603,6 +603,15 @@ button.mini {
   margin-bottom: 16px;
 }
 
+.section-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.section-actions .danger {
+  color: var(--danger);
+}
+
 .add-word-form {
   display: grid;
   gap: 12px;

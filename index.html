@@ -12,7 +12,7 @@
     <link rel="icon" href="./icon-192.png" type="image/png" sizes="192x192" />
     <link rel="apple-touch-icon" href="./icon-192.png" sizes="192x192" type="image/png" />
     <link rel="apple-touch-icon" href="./icon-512.png" sizes="512x512" type="image/png" />
-    <link rel="stylesheet" href="./style.css?v=20260914-2" />
+    <link rel="stylesheet" href="./style.css?v=20260914-6" />
   </head>
   <body>
     <div id="username-modal" class="username-modal hidden" aria-live="polite">
@@ -51,7 +51,10 @@
         <section class="panel tab-panel active" data-panel="words">
           <div class="section-header">
             <h2>All words</h2>
-            <button id="refresh-words-button" class="ghost mini" type="button">Refresh</button>
+            <div class="section-actions">
+              <button id="refresh-words-button" class="ghost mini" type="button">Refresh</button>
+              <button id="delete-all-words-button" class="ghost mini danger" type="button">Delete all</button>
+            </div>
           </div>
 
           <div class="word-toolbar">
@@ -259,7 +262,7 @@
 
     <script src="./config.js"></script>
     <script>
-      const APP_VERSION = '20260914-5';
+      const APP_VERSION = '20260914-6';
       const updateButton = document.getElementById('update-button');
       const updateStatus = document.getElementById('update-status');
       let refreshTimer = null;
@@ -340,6 +343,6 @@
         });
       }
     </script>
-    <script src="./app.js?v=20260914-5"></script>
+    <script src="./app.js?v=20260914-6"></script>
   </body>
 </html>
