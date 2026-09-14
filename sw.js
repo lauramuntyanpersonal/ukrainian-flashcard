@@ -1,4 +1,4 @@
-const CACHE_NAME = 'languini-v3';
+const CACHE_NAME = 'languini-v5';
 const ASSETS = [
   './',
   './index.html',
