@@ -1709,6 +1709,7 @@ function renderSmashRound() {
 function handleSmashChoice(event) {
   const choice = event.target.closest('.smash-choice');
   if (!choice || choice.disabled) return;
+  choice.blur();
   const isCorrect = choice.dataset.cardId === smashCurrentTarget.id;
   const elapsed = (performance.now() - smashRoundStartedAt) / 1000;
   choice.disabled = true;

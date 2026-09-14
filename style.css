@@ -936,6 +936,11 @@ button.mini {
   border-color: var(--primary);
 }
 
+.smash-choice:focus:not(:focus-visible) {
+  outline: none;
+  border-color: var(--border);
+}
+
 .smash-choice.wrong {
   background: #fee2e2;
   border-color: var(--danger);
