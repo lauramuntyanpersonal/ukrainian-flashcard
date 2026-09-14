@@ -1188,7 +1188,8 @@ button.mini {
 
 .flashcard {
   position: relative;
-  min-height: 320px;
+  height: min(460px, 62vh);
+  min-height: 380px;
   border-radius: 16px;
   background: #ffffff;
   border: 1px solid var(--border);
@@ -1206,6 +1207,9 @@ button.mini {
   align-items: center;
   text-align: center;
   padding: 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .back-side {
@@ -1234,6 +1238,8 @@ button.mini {
   font-size: clamp(2rem, 6vw, 3.2rem);
   margin-bottom: 12px;
   line-height: 1.1;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 #phrase-text, #phrase-translation, #note-text {
@@ -1241,6 +1247,8 @@ button.mini {
   font-size: 1rem;
   line-height: 1.5;
   color: var(--muted);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 #phrase-text {
@@ -1346,7 +1354,8 @@ button.mini {
   }
 
   .flashcard {
-    min-height: 260px;
+    height: min(420px, 60vh);
+    min-height: 320px;
     border-radius: 20px;
   }
 }
