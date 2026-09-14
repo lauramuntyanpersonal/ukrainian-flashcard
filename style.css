@@ -820,17 +820,9 @@ button.mini {
   position: relative;
 }
 
-.context-results-reveal {
-  position: absolute;
-  top: 50%;
-  left: 100%;
-  transform: translateY(-50%);
-  white-space: nowrap;
-  transition: left 0.2s ease;
-}
-
-.context-game.results-revealed .context-results-reveal {
-  left: calc(100% - 94px);
+.context-game-end {
+  justify-self: start;
+  margin-top: 4px;
 }
 
 .context-results {
@@ -856,6 +848,28 @@ button.mini {
   display: grid;
   gap: 6px;
   color: var(--muted);
+}
+
+.context-confetti {
+  position: relative;
+  min-height: 26px;
+  overflow: hidden;
+}
+
+.context-confetti span {
+  position: absolute;
+  top: 0;
+  width: 8px;
+  height: 14px;
+  background: var(--primary);
+  animation: context-confetti-fall 900ms ease-out forwards;
+}
+
+@keyframes context-confetti-fall {
+  to {
+    transform: translateY(32px) rotate(180deg);
+    opacity: 0;
+  }
 }
 
 .study-panel.context-writing-active .context-game {

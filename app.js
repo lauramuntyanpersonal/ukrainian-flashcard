@@ -45,11 +45,12 @@ const contextGameAnswer = document.getElementById('context-game-answer');
 const contextGameSubmit = document.getElementById('context-game-submit');
 const contextGameFeedback = document.getElementById('context-game-feedback');
 const contextGameNext = document.getElementById('context-game-next');
-const contextResultsReveal = document.getElementById('context-results-reveal');
+const contextGameEnd = document.getElementById('context-game-end');
 const contextResults = document.getElementById('context-results');
 const contextResultsScore = document.getElementById('context-results-score');
 const contextResultsMistakes = document.getElementById('context-results-mistakes');
 const contextResultsContinue = document.getElementById('context-results-continue');
+const contextConfetti = document.getElementById('context-confetti');
 const studyActions = document.querySelector('.study-actions');
 const studyFooter = document.querySelector('.study-footer');
 const tabButtons = document.querySelectorAll('.tab-button');
@@ -91,6 +92,7 @@ let draggingSelectionMode = true;
 let activeAudio = null;
 let contextInitialViewportHeight = null;
 let contextProgress = null;
+let contextQueue = [];
 
 function readContextProgress() {
   try {
@@ -1236,7 +1238,7 @@ function showSetReviewMode() {
 }
 
 function renderContextResults() {
-  const total = currentCards.length;
+  const total = contextProgress?.total || currentCards.length;
   const correct = contextProgress?.correct || 0;
   const mistakes = Object.values(contextProgress?.mistakes || {})
     .sort((a, b) => b.count - a.count);
@@ -1247,17 +1249,29 @@ function renderContextResults() {
     : '<span>No mistakes recorded yet.</span>';
 }
 
-function showContextResults() {
+function showContextResults(completed = false) {
+  studyPanel.classList.remove('context-writing-active');
+  studyPanel.classList.remove('keyboard-visible');
   if (contextGame) contextGame.classList.add('hidden');
   if (contextResults) contextResults.classList.remove('hidden');
+  if (contextConfetti) {
+    contextConfetti.innerHTML = completed
+      ? Array.from({ length: 18 }, (_, index) => `<span style="left:${(index * 17) % 100}%; background:hsl(${index * 35}, 75%, 55%); animation-delay:${(index % 5) * 45}ms"></span>`).join('')
+      : '';
+  }
   renderContextResults();
 }
 
 function showStudyOptions() {
+  studyPanel.classList.remove('context-writing-active');
+  studyPanel.classList.remove('keyboard-visible');
+  if (studyTitle) studyTitle.classList.remove('hidden');
   if (setReviewList) setReviewList.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.remove('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.remove('hidden');
+  if (contextGame) contextGame.classList.add('hidden');
+  if (contextResults) contextResults.classList.add('hidden');
 }
 
 function beginStudySession() {
@@ -1280,9 +1294,51 @@ function normalizeAnswer(value) {
   return String(value || '').trim().toLocaleLowerCase('uk-UA').replace(/\s+/g, ' ');
 }
 
+function getContextCard() {
+  const cardId = contextQueue[contextProgress?.position || 0];
+  return currentCards.find((card) => card.id === cardId) || null;
+}
+
+function buildContextProgress(savedProgress) {
+  const allCardIds = currentCards.map((card) => card.id);
+  if (savedProgress && !Array.isArray(savedProgress.queue) && Number.isInteger(savedProgress.index)) {
+    return {
+      queue: allCardIds,
+      position: Math.min(savedProgress.index, allCardIds.length),
+      total: currentCards.length,
+      correct: savedProgress.correct || 0,
+      attempts: savedProgress.attempts || 0,
+      mistakes: savedProgress.mistakes || {},
+      complete: false,
+    };
+  }
+
+  if (savedProgress && Array.isArray(savedProgress.queue) && !savedProgress.complete) {
+    return {
+      ...savedProgress,
+      queue: savedProgress.queue.filter((id) => allCardIds.includes(id)),
+      position: Math.min(savedProgress.position || 0, savedProgress.queue.length),
+      total: savedProgress.total || currentCards.length,
+      mistakes: savedProgress.mistakes || {},
+    };
+  }
+
+  return {
+    queue: allCardIds,
+    position: 0,
+    total: currentCards.length,
+    correct: 0,
+    attempts: 0,
+    mistakes: {},
+    complete: false,
+  };
+}
+
 function renderContextGameCard() {
-  const card = currentCards[currentIndex];
+  const card = getContextCard();
   if (!card) return;
+
+  currentIndex = currentCards.findIndex((candidate) => candidate.id === card.id);
 
   contextGameMeaning.textContent = card.back || 'Translate the word from context';
   contextGamePhrase.textContent = card.phrase || `(${card.front})`;
@@ -1306,13 +1362,10 @@ function startContextWritingGame() {
   if (studyFooter) studyFooter.classList.add('hidden');
   if (contextGame) contextGame.classList.remove('hidden');
   if (contextResults) contextResults.classList.add('hidden');
-  contextGame.classList.remove('results-revealed');
   const savedProgress = readContextProgress()[currentSetId];
-  contextProgress = savedProgress && !savedProgress.complete
-    ? savedProgress
-    : { index: 0, correct: 0, attempts: 0, mistakes: {}, complete: false };
+  contextProgress = buildContextProgress(savedProgress);
+  contextQueue = contextProgress.queue;
   currentIndex = 0;
-  currentIndex = Math.min(contextProgress.index || 0, Math.max(currentCards.length - 1, 0));
   renderContextGameCard();
 }
 
@@ -1328,15 +1381,14 @@ function updateContextKeyboardLayout() {
 function advanceContextGame() {
   const currentScrollPosition = window.scrollY;
   const currentPanelScrollPosition = studyPanel.scrollTop;
-  if (currentIndex >= currentCards.length - 1) {
+  if ((contextProgress.position || 0) >= contextQueue.length - 1) {
     contextProgress.complete = true;
-    contextProgress.index = currentCards.length;
+    contextProgress.position = contextQueue.length;
     saveContextProgress();
-    showContextResults();
+    showContextResults(true);
     return;
   }
-  currentIndex = (currentIndex + 1) % currentCards.length;
-  contextProgress.index = currentIndex;
+  contextProgress.position += 1;
   saveContextProgress();
   renderContextGameCard();
   window.scrollTo(0, currentScrollPosition);
@@ -1497,7 +1549,15 @@ selectAllRowsButton.addEventListener('click', () => {
     checkbox.checked = !allChecked;
   });
 });
-backButton.addEventListener('click', showMainView);
+backButton.addEventListener('click', () => {
+  const contextGameIsOpen = contextGame && !contextGame.classList.contains('hidden');
+  const contextResultsAreOpen = contextResults && !contextResults.classList.contains('hidden');
+  if (contextGameIsOpen || contextResultsAreOpen) {
+    showStudyOptions();
+    return;
+  }
+  showMainView();
+});
 
 refreshWordsButton.addEventListener('click', () => {
   renderWordList();
@@ -1600,7 +1660,7 @@ if (contextGameStartButton) {
 }
 
 function checkContextAnswer() {
-    const card = currentCards[currentIndex];
+  const card = getContextCard();
     if (!card) return;
 
     const isCorrect = normalizeAnswer(contextGameAnswer.value) === normalizeAnswer(card.front);
@@ -1612,6 +1672,10 @@ function checkContextAnswer() {
       const existingMistake = contextProgress.mistakes[mistakeKey] || { front: card.front, back: card.back, count: 0 };
       existingMistake.count += 1;
       contextProgress.mistakes[mistakeKey] = existingMistake;
+      if (!contextQueue.slice((contextProgress.position || 0) + 1).includes(card.id)) {
+        contextQueue.push(card.id);
+        contextProgress.queue = contextQueue;
+      }
     }
     saveContextProgress();
     contextGameFeedback.textContent = isCorrect
@@ -1653,34 +1717,20 @@ if (contextGameNext) {
   contextGameNext.addEventListener('click', advanceContextGame);
 }
 
-if (contextResultsReveal) {
-  let contextSwipeStartX = null;
-
-  contextGame.addEventListener('pointerdown', (event) => {
-    contextSwipeStartX = event.clientX;
+if (contextGameEnd) {
+  contextGameEnd.addEventListener('click', () => {
+    showContextResults(false);
   });
-
-  contextGame.addEventListener('pointerup', (event) => {
-    if (contextSwipeStartX === null) return;
-    const delta = event.clientX - contextSwipeStartX;
-    contextSwipeStartX = null;
-    if (delta < -48) {
-      contextGame.classList.add('results-revealed');
-    } else if (delta > 48) {
-      contextGame.classList.remove('results-revealed');
-    }
-  });
-
-  contextResultsReveal.addEventListener('click', showContextResults);
 }
 
 if (contextResultsContinue) {
   contextResultsContinue.addEventListener('click', () => {
-    contextProgress.complete = false;
-    contextProgress.index = 0;
+    contextProgress = buildContextProgress(null);
+    contextQueue = contextProgress.queue;
     saveContextProgress();
     contextResults.classList.add('hidden');
-    contextGame.classList.remove('hidden', 'results-revealed');
+    contextGame.classList.remove('hidden');
+    studyPanel.classList.add('context-writing-active');
     currentIndex = 0;
     renderContextGameCard();
   });
