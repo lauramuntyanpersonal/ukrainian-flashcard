@@ -1523,6 +1523,9 @@ async function validateConjugationAnswer() {
   conjugationGameFeedback.textContent = 'Checking grammar...';
   conjugationGameFeedback.className = 'status';
 
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 20000);
+
   try {
     const response = await fetch(getConjugationFunctionUrl(), {
       method: 'POST',
@@ -1531,6 +1534,7 @@ async function validateConjugationAnswer() {
         apikey: config.supabaseAnonKey,
         Authorization: `Bearer ${config.supabaseAnonKey}`,
       },
+      signal: controller.signal,
       body: JSON.stringify({
         sentence: conjugationExercise.paragraph,
         infinitive: blank.infinitive,
@@ -1540,7 +1544,13 @@ async function validateConjugationAnswer() {
       }),
     });
 
-    const result = await response.json();
+    const responseText = await response.text();
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (parseError) {
+      throw new Error(`The validator returned invalid data (${response.status}).`);
+    }
     if (!response.ok || result.error) {
       throw new Error(result.error || 'Validation failed');
     }
@@ -1560,9 +1570,13 @@ async function validateConjugationAnswer() {
       conjugationGame.classList.add('context-game-retry-active');
     }
   } catch (error) {
-    conjugationGameFeedback.textContent = `The grammar check failed: ${error.message}`;
+    const message = error.name === 'AbortError'
+      ? 'The grammar check timed out. Please try again.'
+      : `The grammar check failed: ${error.message}`;
+    conjugationGameFeedback.textContent = message;
     conjugationGameFeedback.className = 'status error';
   } finally {
+    window.clearTimeout(timeoutId);
     conjugationGameSubmit.disabled = false;
   }
 }
