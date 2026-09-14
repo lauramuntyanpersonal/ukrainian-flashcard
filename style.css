@@ -783,6 +783,7 @@ button.mini {
   box-shadow: none;
   overflow: hidden;
   overscroll-behavior: none;
+  touch-action: pan-y;
 }
 
 .set-review-list {
@@ -903,6 +904,13 @@ button.mini {
   height: min(82vh, 760px);
   min-height: 420px;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  scrollbar-gutter: stable;
+  position: relative;
+  z-index: 1;
   font-size: 1.15rem;
   line-height: 2.2;
   text-align: left;
