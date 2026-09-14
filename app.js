@@ -404,9 +404,9 @@ function saveWordBank(words) {
 
 function mergeUniqueWordEntries(existingItems, incomingItems) {
   const combined = [...(Array.isArray(existingItems) ? existingItems : []), ...(Array.isArray(incomingItems) ? incomingItems : [])];
-  const seen = new Set();
+  const itemsBySignature = new Map();
 
-  return combined.filter((item) => {
+  combined.forEach((item) => {
     if (!item || typeof item !== 'object') return false;
     const signature = [
       item.front || '',
@@ -415,11 +415,21 @@ function mergeUniqueWordEntries(existingItems, incomingItems) {
       item.note || '',
     ].join('|');
 
-    if (!signature.trim()) return false;
-    if (seen.has(signature)) return false;
-    seen.add(signature);
-    return true;
+    if (!signature.trim()) return;
+    const existing = itemsBySignature.get(signature);
+    if (!existing) {
+      itemsBySignature.set(signature, item);
+      return;
+    }
+
+    const enrichedItem = { ...existing };
+    Object.entries(item).forEach(([key, value]) => {
+      if (!enrichedItem[key] && value) enrichedItem[key] = value;
+    });
+    itemsBySignature.set(signature, enrichedItem);
   });
+
+  return [...itemsBySignature.values()];
 }
 
 function mergeUniqueSets(existingSets, incomingSets) {
@@ -484,7 +494,8 @@ function makeCard(raw, idx) {
   const front = getFirstNonEmpty(raw, ['lemme', 'lemma', 'word', 'term', 'text', 'ukrainian', 'front', 'f', 'column_f']);
   const back = getFirstNonEmpty(raw, ['definition', 'word_definition', 'meaning', 'def', 'translation', 'english', 'back', 'i', 'column_i']);
   const phrase = getFirstNonEmpty(raw, ['subtitle', 'phrase', 'example', 'sentence', 'context', 'c', 'column_c']);
-  const phraseTranslation = getFirstNonEmpty(raw, ['subtitle_translation', 'subtitle_en', 'phrase_translation', 'example_en', 'translation_phrase', 'context_en', 'sentence_translation']);
+  const phraseTranslation = getFirstNonEmpty(raw, ['subtitle_translation', 'subtitle_en', 'phrase_translation', 'example_en', 'translation_phrase', 'context_en', 'sentence_translation'])
+    || (phrase ? getFirstNonEmpty(raw, ['translation']) : '');
   const note = getFirstNonEmpty(raw, ['note', 'notes', 'comment', 'category', 'part_of_speech']);
 
   if (!front || (!back && !phrase && !note)) return null;
