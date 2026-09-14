@@ -901,8 +901,9 @@ button.mini {
 }
 
 .conjugation-paragraph {
-  height: min(82vh, 760px);
-  min-height: 420px;
+  height: auto;
+  min-height: 0;
+  max-height: none;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
@@ -914,6 +915,19 @@ button.mini {
   font-size: 1.15rem;
   line-height: 2.2;
   text-align: left;
+}
+
+.study-panel.context-writing-active #conjugation-game {
+  height: calc(100svh - 24px);
+  min-height: 0;
+  overflow: hidden;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto auto;
+}
+
+.study-panel.context-writing-active #conjugation-game .conjugation-paragraph {
+  min-height: 0;
+  max-height: none;
+  height: auto;
 }
 
 .conjugation-game-actions {
