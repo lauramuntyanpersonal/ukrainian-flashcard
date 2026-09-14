@@ -1752,10 +1752,12 @@ function finishSmashGame() {
   smashScoreValue = Number((totalSeconds + penaltySeconds).toFixed(1));
   const highScoreKey = getScopedKey(SMASH_HIGH_SCORE_KEY);
   const previousHighScore = Number(localStorage.getItem(highScoreKey));
-  const isNewBest = !Number.isFinite(previousHighScore) || smashScoreValue < previousHighScore;
+  const hasValidHighScore = Number.isFinite(previousHighScore) && previousHighScore > 0;
+  const isNewBest = !hasValidHighScore || smashScoreValue < previousHighScore;
   if (isNewBest) localStorage.setItem(highScoreKey, String(smashScoreValue));
   smashScore.textContent = `Time: ${smashScoreValue.toFixed(1)} seconds (${smashWrongCount} wrong-click ${smashWrongCount === 1 ? 'penalty' : 'penalties'})`;
-  smashHighScore.textContent = `Best time: ${Number(isNewBest ? smashScoreValue : previousHighScore).toFixed(1)} seconds${isNewBest ? ' — new best!' : ''}`;
+  const bestTime = isNewBest ? smashScoreValue : previousHighScore;
+  smashHighScore.textContent = `Best time: ${bestTime.toFixed(1)} seconds${isNewBest ? ' — new best!' : ''}`;
   if (studySettingsButton) studySettingsButton.classList.remove('hidden');
   if (smashLanguageToggle) smashLanguageToggle.classList.remove('hidden');
 }
