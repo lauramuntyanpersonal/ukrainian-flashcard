@@ -56,7 +56,6 @@ const contextResultsContinue = document.getElementById('context-results-continue
 const contextConfetti = document.getElementById('context-confetti');
 const conjugationGame = document.getElementById('conjugation-game');
 const conjugationGameTitle = document.getElementById('conjugation-game-title');
-const conjugationGameProgress = document.getElementById('conjugation-game-progress');
 const conjugationEnglishToggle = document.getElementById('conjugation-english-toggle');
 const conjugationGameEnglish = document.getElementById('conjugation-game-english');
 const conjugationGameSentence = document.getElementById('conjugation-game-sentence');
@@ -1479,7 +1478,6 @@ function renderConjugationParagraph() {
   });
 
   conjugationGameTitle.textContent = conjugationExercise.title || 'Fill in the paragraph';
-  conjugationGameProgress.textContent = `Blank ${conjugationBlankIndex + 1} of ${conjugationExercise.blanks.length}`;
   conjugationGameEnglish.textContent = conjugationExercise.translation || 'English translation is not available for this paragraph.';
   conjugationGameSentence.innerHTML = paragraphHtml;
   updateConjugationSubmitState();
@@ -1557,7 +1555,6 @@ async function validateConjugationAnswer() {
   });
 
   if (!wrongAnswers.length) {
-    conjugationGameProgress.textContent = 'Paragraph complete';
     conjugationGameFeedback.textContent = 'All answers are correct. You finished the paragraph!';
     conjugationGameFeedback.className = 'status success';
     return;
