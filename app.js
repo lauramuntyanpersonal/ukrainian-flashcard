@@ -83,6 +83,8 @@ const usernameStatus = document.getElementById('username-status');
 const usernameModal = document.getElementById('username-modal');
 const startUsernameInput = document.getElementById('start-username-input');
 const startSaveUsernameButton = document.getElementById('start-save-username-button');
+const syncNowButton = document.getElementById('sync-now-button');
+const syncStatus = document.getElementById('sync-status');
 const accountButton = document.getElementById('account-button');
 const appUpdateButton = document.getElementById('update-button');
 
@@ -247,7 +249,7 @@ async function syncUserDataFromCloud() {
       },
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) throw new Error(`Cloud read failed (${response.status}).`);
     const rows = await response.json();
     if (!rows || !rows.length) {
       await syncUserDataToCloud();
@@ -262,6 +264,7 @@ async function syncUserDataFromCloud() {
 
     return data;
   } catch (error) {
+    if (syncStatus) syncStatus.textContent = error.message;
     return null;
   }
 }
@@ -298,11 +301,12 @@ async function syncUserDataToCloud() {
     });
 
     if (!response.ok) {
-      return null;
+      throw new Error(`Cloud save failed (${response.status}): ${await response.text()}`);
     }
 
     return payload.data;
   } catch (error) {
+    if (syncStatus) syncStatus.textContent = error.message;
     return null;
   }
 }
@@ -2121,6 +2125,26 @@ if (accountButton) {
 if (startSaveUsernameButton) {
   startSaveUsernameButton.addEventListener('click', async () => {
     await saveCurrentUsername(startUsernameInput ? startUsernameInput.value : '');
+  });
+}
+
+if (syncNowButton) {
+  syncNowButton.addEventListener('click', async () => {
+    syncNowButton.disabled = true;
+    if (syncStatus) syncStatus.textContent = 'Syncing...';
+    try {
+      if (getCurrentUsername() === 'default' && startUsernameInput?.value.trim()) {
+        await saveCurrentUsername(startUsernameInput.value);
+      }
+      const data = await syncUserDataFromCloud();
+      renderWordList();
+      renderSetList();
+      if (syncStatus) syncStatus.textContent = data ? 'Synced successfully.' : 'Saved locally; no cloud record was found yet.';
+    } catch (error) {
+      if (syncStatus) syncStatus.textContent = error.message;
+    } finally {
+      syncNowButton.disabled = false;
+    }
   });
 }
 
