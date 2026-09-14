@@ -857,12 +857,12 @@ button.mini {
   width: 8px;
   height: 14px;
   background: var(--primary);
-  animation: context-confetti-fall 900ms ease-out forwards;
+  animation: context-confetti-fall 2400ms ease-out forwards;
 }
 
 @keyframes context-confetti-fall {
   to {
-    transform: translateY(32px) rotate(180deg);
+    transform: translateY(58px) rotate(360deg);
     opacity: 0;
   }
 }
@@ -886,6 +886,17 @@ button.mini {
   margin-bottom: 0;
   display: flex;
   align-items: center;
+}
+
+.context-game-retry {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.context-game-retry.hidden {
+  display: none;
 }
 
 .context-game label[for="context-game-answer"] {

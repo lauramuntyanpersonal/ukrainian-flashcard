@@ -41,12 +41,14 @@ const setReviewList = document.getElementById('set-review-list');
 const contextGame = document.getElementById('context-game');
 const contextGameMeaning = document.getElementById('context-game-meaning');
 const contextGamePhrase = document.getElementById('context-game-phrase');
+const contextGameRetry = document.getElementById('context-game-retry');
 const contextGameAnswer = document.getElementById('context-game-answer');
 const contextGameSubmit = document.getElementById('context-game-submit');
 const contextGameFeedback = document.getElementById('context-game-feedback');
 const contextGameNext = document.getElementById('context-game-next');
 const contextGameEnd = document.getElementById('context-game-end');
 const contextResults = document.getElementById('context-results');
+const contextResultsTitle = document.getElementById('context-results-title');
 const contextResultsScore = document.getElementById('context-results-score');
 const contextResultsMistakes = document.getElementById('context-results-mistakes');
 const contextResultsContinue = document.getElementById('context-results-continue');
@@ -1233,6 +1235,8 @@ function showSetReviewMode() {
   }
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.remove('hidden');
+  if (studySettingsButton) studySettingsButton.classList.add('hidden');
+  if (studySettingsMenu) studySettingsMenu.classList.add('hidden');
   if (flashcard) flashcard.classList.add('hidden');
   if (studyActions) studyActions.classList.add('hidden');
   if (studyFooter) studyFooter.classList.add('hidden');
@@ -1253,11 +1257,15 @@ function renderContextResults() {
 function showContextResults(completed = false) {
   studyPanel.classList.remove('context-writing-active');
   studyPanel.classList.remove('keyboard-visible');
+  if (studySettingsMenu) studySettingsMenu.classList.add('hidden');
+  if (studySettingsButton) studySettingsButton.classList.add('hidden');
+  if (contextGameEnd) contextGameEnd.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
   if (contextResults) contextResults.classList.remove('hidden');
+  contextResultsTitle.textContent = completed ? 'You finished the game!' : 'Context word results';
   if (contextConfetti) {
     contextConfetti.innerHTML = completed
-      ? Array.from({ length: 18 }, (_, index) => `<span style="left:${(index * 17) % 100}%; background:hsl(${index * 35}, 75%, 55%); animation-delay:${(index % 5) * 45}ms"></span>`).join('')
+      ? Array.from({ length: 32 }, (_, index) => `<span style="left:${(index * 17) % 100}%; background:hsl(${index * 35}, 75%, 55%); animation-delay:${(index % 10) * 100}ms"></span>`).join('')
       : '';
   }
   renderContextResults();
@@ -1269,6 +1277,8 @@ function showStudyOptions() {
   if (studyTitle) studyTitle.classList.remove('hidden');
   if (setReviewList) setReviewList.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
+  if (studySettingsButton) studySettingsButton.classList.add('hidden');
+  if (studySettingsMenu) studySettingsMenu.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.remove('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.remove('hidden');
   if (contextGameEnd) contextGameEnd.classList.add('hidden');
@@ -1284,6 +1294,7 @@ function beginStudySession() {
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
   if (contextGameEnd) contextGameEnd.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
+  if (studySettingsButton) studySettingsButton.classList.remove('hidden');
   if (studyTitle) studyTitle.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
@@ -1345,6 +1356,8 @@ function renderContextGameCard() {
 
   contextGameMeaning.textContent = card.back || 'Translate the word from context';
   contextGamePhrase.textContent = card.phrase || `(${card.front})`;
+  const mistakeCount = contextProgress?.mistakes?.[card.id]?.count || 0;
+  contextGameRetry.classList.toggle('hidden', mistakeCount === 0);
   contextGameAnswer.value = '';
   contextGameFeedback.textContent = '';
   contextGameFeedback.className = 'status';
@@ -1359,6 +1372,7 @@ function startContextWritingGame() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
+  if (studySettingsButton) studySettingsButton.classList.remove('hidden');
   if (studyTitle) studyTitle.classList.add('hidden');
   if (flashcard) flashcard.classList.add('hidden');
   if (studyActions) studyActions.classList.add('hidden');
