@@ -908,6 +908,24 @@ button.mini {
   text-align: left;
 }
 
+.conjugation-game-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  min-height: 56px;
+  padding-top: 8px;
+}
+
+.conjugation-game-actions .context-submit-button {
+  background: var(--muted);
+  opacity: 0.6;
+}
+
+.conjugation-game-actions .context-submit-button:not(:disabled) {
+  background: var(--primary);
+  opacity: 1;
+}
+
 .conjugation-english {
   margin: 0;
   padding: 10px 12px;

@@ -83,6 +83,11 @@ Rules:
       return new Response(JSON.stringify(exercise), { headers: jsonHeaders });
     }
 
+    if (body.mode === "translate") {
+      const translation = await askGemini(`Translate this Ukrainian paragraph into natural English. Return JSON only: {"translation":"..."}\n\n${body.paragraph}`, apiKey);
+      return new Response(JSON.stringify(translation), { headers: jsonHeaders });
+    }
+
     const prompt = `
 Validate this Ukrainian grammar answer in context.
 

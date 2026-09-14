@@ -1440,6 +1440,19 @@ async function requestConjugationExercise() {
   if (!response.ok || result.error || !result.paragraph || !Array.isArray(result.blanks)) {
     throw new Error(result.error || 'The AI did not return a valid paragraph exercise.');
   }
+  if (!result.translation && result.paragraph) {
+    const translationResponse = await fetch(getConjugationFunctionUrl(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: config.supabaseAnonKey,
+        Authorization: `Bearer ${config.supabaseAnonKey}`,
+      },
+      body: JSON.stringify({ mode: 'translate', paragraph: result.paragraph }),
+    });
+    const translationResult = await translationResponse.json();
+    result.translation = translationResult.translation || '';
+  }
   return result;
 }
 
@@ -1469,11 +1482,19 @@ function renderConjugationParagraph() {
   conjugationGameProgress.textContent = `Blank ${conjugationBlankIndex + 1} of ${conjugationExercise.blanks.length}`;
   conjugationGameEnglish.textContent = conjugationExercise.translation || 'English translation is not available for this paragraph.';
   conjugationGameSentence.innerHTML = paragraphHtml;
+  updateConjugationSubmitState();
   const activeInput = conjugationGameSentence.querySelector(`[data-blank-index="${conjugationBlankIndex}"]`);
   activeInput?.focus({ preventScroll: true });
   conjugationGameFeedback.textContent = '';
   conjugationGameFeedback.className = 'status';
   conjugationGame.classList.remove('context-game-retry-active');
+}
+
+function updateConjugationSubmitState() {
+  const inputs = [...conjugationGameSentence.querySelectorAll('.conjugation-inline-answer')];
+  const allFilled = inputs.length > 0 && inputs.every((input) => input.value.trim());
+  conjugationGameSubmit.disabled = !allFilled;
+  conjugationGameSubmit.title = allFilled ? 'Validate answers' : 'Fill every blank first';
 }
 
 async function startConjugationGame() {
@@ -1900,6 +1921,7 @@ if (conjugationEnglishToggle && conjugationGameEnglish) {
 }
 
 if (conjugationGameSentence) {
+    conjugationGameSentence.addEventListener('input', updateConjugationSubmitState);
   conjugationGameSentence.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
