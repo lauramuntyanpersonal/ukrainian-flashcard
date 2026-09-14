@@ -32,7 +32,6 @@ const studyTitle = document.getElementById('study-title');
 const studyHeaderCopy = document.querySelector('.study-header-copy');
 const backButton = document.getElementById('back-button');
 const navBackButton = document.getElementById('nav-back-button');
-const deleteCardButton = document.getElementById('delete-card-btn');
 const beginStudyButton = document.getElementById('begin-study-btn');
 const contextGameStartButton = document.getElementById('context-game-start-btn');
 const conjugationGameStartButton = document.getElementById('conjugation-game-start-btn');
@@ -1994,38 +1993,6 @@ function handleSpeak() {
   speakText(activeText, language);
 }
 
-function deleteCurrentCard() {
-  if (!currentSetId || !currentCards.length) return;
-
-  const currentCard = currentCards[currentIndex];
-  if (!currentCard) return;
-
-  const sets = readSets().map((set) => {
-    if (set.id !== currentSetId) return set;
-    return {
-      ...set,
-      cards: (set.cards || []).filter((card) => card.id !== currentCard.id),
-    };
-  });
-
-  saveSets(sets);
-
-  const updatedSet = sets.find((set) => set.id === currentSetId) || { cards: [] };
-  currentCards = updatedSet.cards || [];
-
-  if (!currentCards.length) {
-    renderCurrentCard();
-    renderSetList();
-    showStatus('Card deleted.', 'success');
-    return;
-  }
-
-  currentIndex = Math.min(currentIndex, currentCards.length - 1);
-  renderCurrentCard();
-  renderSetList();
-  showStatus('Card deleted.', 'success');
-}
-
 uploadForm.addEventListener('submit', handleUpload);
 createSelectedSetButton.addEventListener('click', createSetFromSelectedRows);
 selectAllRowsButton.addEventListener('click', () => {
@@ -2139,10 +2106,6 @@ if (addWordForm) {
     toggleAddWordFormButton.textContent = 'Add word';
     showStatus('Word added.', 'success');
   });
-}
-
-if (deleteCardButton) {
-  deleteCardButton.addEventListener('click', deleteCurrentCard);
 }
 
 if (beginStudyButton) {
