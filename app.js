@@ -151,6 +151,15 @@ function shuffledCopy(items) {
   return shuffled;
 }
 
+function getSmashWordType(card) {
+  const note = String(card?.note || '').toLowerCase();
+  if (/(noun|іменник|существитель)/.test(note)) return 'noun';
+  if (/(verb|дієслово|глагол)/.test(note)) return 'verb';
+  if (/(adjective|прикметник|прилагатель)/.test(note)) return 'adjective';
+  if (/(adverb|прислівник|наречие)/.test(note)) return 'adverb';
+  return 'unknown';
+}
+
 function readContextProgress() {
   try {
     const allProgress = JSON.parse(localStorage.getItem(getScopedKey(CONTEXT_PROGRESS_KEY)) || '{}');
@@ -1662,7 +1671,10 @@ function renderSmashRound() {
   }
 
   const target = shuffledCopy(currentCards)[0];
-  const distractors = shuffledCopy(currentCards.filter((card) => card.id !== target.id)).slice(0, 8);
+  const targetType = getSmashWordType(target);
+  const sameType = currentCards.filter((card) => card.id !== target.id && getSmashWordType(card) === targetType);
+  const otherWords = currentCards.filter((card) => card.id !== target.id && !sameType.includes(card));
+  const distractors = shuffledCopy([...sameType, ...otherWords]).slice(0, 8);
   const choices = shuffledCopy([target, ...distractors]);
   smashCurrentTarget = target;
   smashPrompt.textContent = smashPromptLanguage === 'en' ? target.back : target.front;
