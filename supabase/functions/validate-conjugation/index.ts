@@ -67,10 +67,14 @@ Return JSON only in this format:
 
 Rules:
 - Use 5 to 10 supplied vocabulary items when possible.
-- Use each target item in a grammatically meaningful form.
+- Every supplied vocabulary item must correspond to one numbered blank.
+- Use the supplied word as the grammatical target, not as unrelated background vocabulary.
+- For verbs, the blank must contain an inflected/conjugated form, never the raw infinitive.
+- For nouns or adjectives, use an appropriate declined or inflected form and explain the case.
 - The paragraph must be natural Ukrainian.
 - Every placeholder must have exactly one matching blanks entry.
 - Put the infinitive only in the metadata, not in place of the blank.
+- The answer field must be the inflected form used at that placeholder.
 - Do not include explanations inside the Ukrainian paragraph.
 `;
       const exercise = await askGemini(prompt, apiKey);

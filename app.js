@@ -1451,6 +1451,10 @@ function renderConjugationParagraph() {
   const blank = conjugationExercise?.blanks?.[conjugationBlankIndex];
   if (!blank) return;
 
+  conjugationGameSentence.querySelectorAll('[data-blank-index]').forEach((input) => {
+    conjugationAnswers[input.dataset.blankIndex] = input.value;
+  });
+
   const paragraph = String(conjugationExercise.paragraph || '');
   const paragraphHtml = escapeHtml(paragraph).replace(/\{(\d+)\}/g, (_, index) => {
     const blankIndex = Number(index);
