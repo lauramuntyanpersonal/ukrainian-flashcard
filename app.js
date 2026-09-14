@@ -2,6 +2,7 @@ const STORAGE_KEY = 'ukrainian-flashcards-sets-v1';
 const WORD_BANK_KEY = 'ukrainian-flashcards-word-bank-v1';
 const USERNAME_KEY = 'ukrainian-flashcards-username-v1';
 const CONTEXT_PROGRESS_KEY = 'ukrainian-flashcards-context-progress-v1';
+const CONJUGATION_USED_WORDS_KEY = 'ukrainian-flashcards-conjugation-used-v1';
 
 const demoSets = [];
 
@@ -106,6 +107,19 @@ let contextQueue = [];
 let conjugationExercise = null;
 let conjugationBlankIndex = 0;
 let conjugationAnswers = {};
+
+function readConjugationUsedWords() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(getScopedKey(CONJUGATION_USED_WORDS_KEY)) || '{}');
+    return stored && typeof stored === 'object' ? stored : {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function saveConjugationUsedWords(usedWords) {
+  localStorage.setItem(getScopedKey(CONJUGATION_USED_WORDS_KEY), JSON.stringify(usedWords));
+}
 
 function readContextProgress() {
   try {
@@ -1419,7 +1433,18 @@ function getConjugationFunctionUrl() {
 
 async function requestConjugationExercise() {
   const config = window.FLASHCARDS_CONFIG || {};
-  const words = currentCards.slice(0, Math.min(10, Math.max(5, currentCards.length))).map((card) => ({
+  const allWordIds = currentCards.map((card) => card.front);
+  const usedWords = readConjugationUsedWords();
+  let availableCards = currentCards.filter((card) => !usedWords[currentSetId]?.includes(card.id || card.front));
+
+  if (!availableCards.length) {
+    usedWords[currentSetId] = [];
+    saveConjugationUsedWords(usedWords);
+    availableCards = [...currentCards];
+  }
+
+  const wordCount = Math.min(10, availableCards.length);
+  const words = availableCards.slice(0, wordCount).map((card) => ({
     infinitive: card.front,
     meaning: card.back,
     context: card.phrase || '',
@@ -1439,6 +1464,10 @@ async function requestConjugationExercise() {
   if (!response.ok || result.error || !result.paragraph || !Array.isArray(result.blanks)) {
     throw new Error(result.error || 'The AI did not return a valid paragraph exercise.');
   }
+
+  usedWords[currentSetId] = [...new Set([...(usedWords[currentSetId] || []), ...words.map((word) => word.infinitive)])]
+    .filter((word) => allWordIds.includes(word));
+  saveConjugationUsedWords(usedWords);
   if (!result.translation && result.paragraph) {
     const translationResponse = await fetch(getConjugationFunctionUrl(), {
       method: 'POST',
