@@ -1485,6 +1485,9 @@ function startContextWritingGame() {
   if (studyActions) studyActions.classList.add('hidden');
   if (studyFooter) studyFooter.classList.add('hidden');
   if (contextGame) contextGame.classList.remove('hidden');
+  if (conjugationGame) conjugationGame.classList.add('hidden');
+  if (smashGame) smashGame.classList.add('hidden');
+  if (smashResults) smashResults.classList.add('hidden');
   if (contextGameEnd) contextGameEnd.classList.remove('hidden');
   if (contextResults) contextResults.classList.add('hidden');
   const savedProgress = readContextProgress()[currentSetId];
@@ -1611,6 +1614,8 @@ async function startConjugationGame() {
   if (studySettingsButton) studySettingsButton.classList.add('hidden');
   if (studyTitle) studyTitle.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
+  if (smashGame) smashGame.classList.add('hidden');
+  if (smashResults) smashResults.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
   if (flashcard) flashcard.classList.add('hidden');
   if (studyActions) studyActions.classList.add('hidden');
