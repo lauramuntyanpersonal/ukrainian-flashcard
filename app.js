@@ -1661,6 +1661,7 @@ function startSmashGame() {
   if (contextGame) contextGame.classList.add('hidden');
   if (conjugationGame) conjugationGame.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
+  if (smashGame) smashGame.classList.remove('hidden');
   if (smashResults) smashResults.classList.add('hidden');
 
   smashRoundIndex = 0;
