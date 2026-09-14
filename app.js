@@ -61,6 +61,7 @@ const conjugationEnglishToggle = document.getElementById('conjugation-english-to
 const conjugationGameEnglish = document.getElementById('conjugation-game-english');
 const conjugationGameSentence = document.getElementById('conjugation-game-sentence');
 const conjugationGameSubmit = document.getElementById('conjugation-game-submit');
+const conjugationNewParagraph = document.getElementById('conjugation-new-paragraph');
 const conjugationGameFeedback = document.getElementById('conjugation-game-feedback');
 const studyActions = document.querySelector('.study-actions');
 const studyFooter = document.querySelector('.study-footer');
@@ -1514,6 +1515,7 @@ function renderConjugationParagraph() {
   activeInput?.focus({ preventScroll: true });
   conjugationGameFeedback.textContent = '';
   conjugationGameFeedback.className = 'status';
+  if (conjugationNewParagraph) conjugationNewParagraph.classList.add('hidden');
   conjugationGame.classList.remove('context-game-retry-active');
 }
 
@@ -1549,6 +1551,7 @@ async function startConjugationGame() {
     conjugationExercise = await requestConjugationExercise();
     conjugationBlankIndex = 0;
     conjugationAnswers = {};
+    if (conjugationNewParagraph) conjugationNewParagraph.classList.add('hidden');
     renderConjugationParagraph();
   } catch (error) {
     conjugationGameFeedback.textContent = `Could not create the paragraph: ${error.message}`;
@@ -1584,8 +1587,10 @@ async function validateConjugationAnswer() {
   });
 
   if (!wrongAnswers.length) {
-    conjugationGameFeedback.textContent = 'All answers are correct. You finished the paragraph!';
+    conjugationGameFeedback.textContent = 'Congratulations! You finished this paragraph!';
     conjugationGameFeedback.className = 'status success';
+    conjugationGameSubmit.disabled = true;
+    if (conjugationNewParagraph) conjugationNewParagraph.classList.remove('hidden');
     return;
   }
 
@@ -1890,6 +1895,10 @@ if (conjugationGameStartButton) {
 
 if (conjugationGameSubmit) {
   conjugationGameSubmit.addEventListener('click', validateConjugationAnswer);
+}
+
+if (conjugationNewParagraph) {
+  conjugationNewParagraph.addEventListener('click', startConjugationGame);
 }
 
 if (conjugationEnglishToggle && conjugationGameEnglish) {
