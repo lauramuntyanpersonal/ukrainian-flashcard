@@ -958,6 +958,16 @@ button.mini {
   font-size: 1rem;
 }
 
+.conjugation-inline-answer.conjugation-answer-correct {
+  border-bottom-color: var(--success);
+  background: rgba(15, 157, 88, 0.12);
+}
+
+.conjugation-inline-answer.conjugation-answer-wrong {
+  border-bottom-color: var(--danger);
+  background: rgba(217, 48, 37, 0.12);
+}
+
 .conjugation-blank-wrap small {
   color: var(--muted);
   font-size: 0.72rem;

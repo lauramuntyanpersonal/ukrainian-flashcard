@@ -1530,108 +1530,41 @@ async function startConjugationGame() {
 }
 
 async function validateConjugationAnswer() {
-  const blank = conjugationExercise?.blanks?.[conjugationBlankIndex];
-  if (!blank) return;
-
-  const activeInput = conjugationGameSentence.querySelector(`[data-blank-index="${conjugationBlankIndex}"]`);
-  const typedAnswer = activeInput?.value.trim() || '';
-  if (!typedAnswer) {
-    conjugationGameFeedback.textContent = 'Type an answer first.';
+  const inputs = [...conjugationGameSentence.querySelectorAll('.conjugation-inline-answer')];
+  const missing = inputs.filter((input) => !input.value.trim());
+  if (missing.length) {
+    conjugationGameFeedback.textContent = `Fill in all ${missing.length} remaining blank${missing.length === 1 ? '' : 's'} first.`;
     conjugationGameFeedback.className = 'status error';
-    activeInput?.focus({ preventScroll: true });
-    return;
-  }
-  conjugationAnswers[conjugationBlankIndex] = typedAnswer;
-
-  const config = window.FLASHCARDS_CONFIG || {};
-  if (!config.supabaseUrl || !config.supabaseAnonKey) {
-    conjugationGameFeedback.textContent = 'Supabase is not configured yet.';
-    conjugationGameFeedback.className = 'status error';
+    missing[0].focus({ preventScroll: true });
     return;
   }
 
-  conjugationGameSubmit.disabled = true;
-  conjugationGameFeedback.textContent = 'Checking grammar...';
-  conjugationGameFeedback.className = 'status';
+  let correctCount = 0;
+  const wrongAnswers = [];
+  inputs.forEach((input) => {
+    const index = Number(input.dataset.blankIndex);
+    const blank = conjugationExercise.blanks[index];
+    const typedAnswer = input.value.trim();
+    conjugationAnswers[index] = typedAnswer;
+    const acceptedAnswers = [blank.answer, ...(Array.isArray(blank.alternatives) ? blank.alternatives : [])]
+      .filter(Boolean)
+      .map(normalizeAnswer);
+    const isCorrect = acceptedAnswers.includes(normalizeAnswer(typedAnswer));
+    input.classList.toggle('conjugation-answer-correct', isCorrect);
+    input.classList.toggle('conjugation-answer-wrong', !isCorrect);
+    if (isCorrect) correctCount += 1;
+    else wrongAnswers.push(`${index + 1}: ${blank.answer}`);
+  });
 
-  const acceptedAnswers = [blank.answer, ...(Array.isArray(blank.alternatives) ? blank.alternatives : [])]
-    .filter(Boolean)
-    .map(normalizeAnswer);
-
-  if (acceptedAnswers.includes(normalizeAnswer(typedAnswer))) {
-    conjugationGameFeedback.textContent = `Correct! ${blank.grammar || ''}`;
+  if (!wrongAnswers.length) {
+    conjugationGameProgress.textContent = 'Paragraph complete';
+    conjugationGameFeedback.textContent = 'All answers are correct. You finished the paragraph!';
     conjugationGameFeedback.className = 'status success';
-    conjugationBlankIndex += 1;
-    if (conjugationBlankIndex < conjugationExercise.blanks.length) {
-      renderConjugationParagraph();
-      conjugationGameFeedback.textContent = 'Correct! Moving to the next blank.';
-      conjugationGameFeedback.className = 'status success';
-    } else {
-      conjugationGameProgress.textContent = 'Paragraph complete';
-      conjugationGameFeedback.textContent = 'You finished the paragraph!';
-    }
-    conjugationGameSubmit.disabled = false;
     return;
   }
 
-  const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), 20000);
-
-  try {
-    const response = await fetch(getConjugationFunctionUrl(), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: config.supabaseAnonKey,
-        Authorization: `Bearer ${config.supabaseAnonKey}`,
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        sentence: conjugationExercise.paragraph,
-        infinitive: blank.infinitive,
-        typedAnswer,
-        grammar: blank.grammar || 'Choose the grammatically correct Ukrainian form for this context.',
-        learnerGender: 'unknown',
-      }),
-    });
-
-    const responseText = await response.text();
-    let result;
-    try {
-      result = JSON.parse(responseText);
-    } catch (parseError) {
-      throw new Error(`The validator returned invalid data (${response.status}).`);
-    }
-    if (!response.ok || result.error) {
-      throw new Error(result.error || 'Validation failed');
-    }
-
-    if (result.correct) {
-      const successMessage = `Correct! ${result.explanation || ''}`;
-      conjugationBlankIndex += 1;
-      if (conjugationBlankIndex < conjugationExercise.blanks.length) {
-        renderConjugationParagraph();
-        conjugationGameFeedback.textContent = successMessage;
-        conjugationGameFeedback.className = 'status success';
-      } else {
-        conjugationGameProgress.textContent = 'Paragraph complete';
-        conjugationGameFeedback.textContent = `${successMessage} You finished the paragraph!`;
-        conjugationGameFeedback.className = 'status success';
-      }
-    } else {
-      conjugationGameFeedback.textContent = `Try again. ${result.explanation || `Correct form: ${result.correctedAnswer || 'see the context'}`}`;
-      conjugationGame.classList.add('context-game-retry-active');
-    }
-  } catch (error) {
-    const message = error.name === 'AbortError'
-      ? 'The grammar check timed out. Please try again.'
-      : `The grammar check failed: ${error.message}`;
-    conjugationGameFeedback.textContent = message;
-    conjugationGameFeedback.className = 'status error';
-  } finally {
-    window.clearTimeout(timeoutId);
-    conjugationGameSubmit.disabled = false;
-  }
+  conjugationGameFeedback.textContent = `${correctCount} of ${inputs.length} correct. Correct forms: ${wrongAnswers.join(' | ')}`;
+  conjugationGameFeedback.className = 'status error';
 }
 
 function updateContextKeyboardLayout() {
