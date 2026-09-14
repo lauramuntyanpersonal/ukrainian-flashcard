@@ -3,6 +3,7 @@ const WORD_BANK_KEY = 'ukrainian-flashcards-word-bank-v1';
 const USERNAME_KEY = 'ukrainian-flashcards-username-v1';
 const CONTEXT_PROGRESS_KEY = 'ukrainian-flashcards-context-progress-v1';
 const CONJUGATION_USED_WORDS_KEY = 'ukrainian-flashcards-conjugation-used-v1';
+const SMASH_HIGH_SCORE_KEY = 'ukrainian-flashcards-smash-high-score-v1';
 
 const demoSets = [];
 
@@ -66,6 +67,7 @@ const smashGrid = document.getElementById('smash-grid');
 const smashFeedback = document.getElementById('smash-feedback');
 const smashResults = document.getElementById('smash-results');
 const smashScore = document.getElementById('smash-score');
+const smashHighScore = document.getElementById('smash-high-score');
 const smashPlayAgain = document.getElementById('smash-play-again');
 const conjugationGameTitle = document.getElementById('conjugation-game-title');
 const conjugationEnglishToggle = document.getElementById('conjugation-english-toggle');
@@ -123,6 +125,8 @@ let conjugationBlankIndex = 0;
 let conjugationAnswers = {};
 let smashRoundIndex = 0;
 let smashScoreValue = 0;
+let smashWrongCount = 0;
+let smashGameStartedAt = 0;
 let smashPromptLanguage = 'en';
 let smashCurrentTarget = null;
 let smashRoundStartedAt = 0;
@@ -1678,6 +1682,8 @@ function startSmashGame() {
 
   smashRoundIndex = 0;
   smashScoreValue = 0;
+  smashWrongCount = 0;
+  smashGameStartedAt = performance.now();
   renderSmashRound();
 }
 
@@ -1715,7 +1721,6 @@ function handleSmashChoice(event) {
   choice.disabled = true;
 
   if (isCorrect) {
-    smashScoreValue += Math.max(1, Math.round(100 - elapsed * 10));
     choice.classList.add('correct');
     smashFeedback.textContent = 'Correct!';
     smashFeedback.className = 'status success';
@@ -1725,6 +1730,7 @@ function handleSmashChoice(event) {
       renderSmashRound();
     }, 450);
   } else {
+    smashWrongCount += 1;
     choice.classList.add('wrong');
     smashFeedback.textContent = 'WRONG';
     smashFeedback.className = 'status error';
@@ -1741,7 +1747,15 @@ function finishSmashGame() {
   smashGrid.innerHTML = '';
   smashGame.classList.add('hidden');
   smashResults.classList.remove('hidden');
-  smashScore.textContent = `Score: ${smashScoreValue} points`;
+  const totalSeconds = (performance.now() - smashGameStartedAt) / 1000;
+  const penaltySeconds = smashWrongCount * 2;
+  smashScoreValue = Number((totalSeconds + penaltySeconds).toFixed(1));
+  const highScoreKey = getScopedKey(SMASH_HIGH_SCORE_KEY);
+  const previousHighScore = Number(localStorage.getItem(highScoreKey));
+  const isNewBest = !Number.isFinite(previousHighScore) || smashScoreValue < previousHighScore;
+  if (isNewBest) localStorage.setItem(highScoreKey, String(smashScoreValue));
+  smashScore.textContent = `Time: ${smashScoreValue.toFixed(1)} seconds (${smashWrongCount} wrong-click ${smashWrongCount === 1 ? 'penalty' : 'penalties'})`;
+  smashHighScore.textContent = `Best time: ${Number(isNewBest ? smashScoreValue : previousHighScore).toFixed(1)} seconds${isNewBest ? ' — new best!' : ''}`;
   if (studySettingsButton) studySettingsButton.classList.remove('hidden');
   if (smashLanguageToggle) smashLanguageToggle.classList.remove('hidden');
 }
