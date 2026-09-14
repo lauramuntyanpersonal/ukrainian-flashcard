@@ -1554,6 +1554,26 @@ async function validateConjugationAnswer() {
   conjugationGameFeedback.textContent = 'Checking grammar...';
   conjugationGameFeedback.className = 'status';
 
+  const acceptedAnswers = [blank.answer, ...(Array.isArray(blank.alternatives) ? blank.alternatives : [])]
+    .filter(Boolean)
+    .map(normalizeAnswer);
+
+  if (acceptedAnswers.includes(normalizeAnswer(typedAnswer))) {
+    conjugationGameFeedback.textContent = `Correct! ${blank.grammar || ''}`;
+    conjugationGameFeedback.className = 'status success';
+    conjugationBlankIndex += 1;
+    if (conjugationBlankIndex < conjugationExercise.blanks.length) {
+      renderConjugationParagraph();
+      conjugationGameFeedback.textContent = 'Correct! Moving to the next blank.';
+      conjugationGameFeedback.className = 'status success';
+    } else {
+      conjugationGameProgress.textContent = 'Paragraph complete';
+      conjugationGameFeedback.textContent = 'You finished the paragraph!';
+    }
+    conjugationGameSubmit.disabled = false;
+    return;
+  }
+
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), 20000);
 
