@@ -656,10 +656,25 @@ function updateUsernameStatus() {
 }
 
 function deleteWordByIndex(index) {
-  const nextWords = readWordBank().filter((_, wordIndex) => wordIndex !== index);
-  saveWordBank(nextWords);
+  const words = readWordBank();
+  const deletedWord = words[index];
+  if (!deletedWord) return;
+
+  const deletedWordKey = getWordKey(deletedWord);
+  const nextWords = words.filter((_, wordIndex) => wordIndex !== index);
+  const nextSets = readSets().map((set) => ({
+    ...set,
+    cards: (Array.isArray(set.cards) ? set.cards : [])
+      .filter((card) => getWordKey(card) !== deletedWordKey),
+  }));
+
+  localStorage.setItem(getScopedKey(WORD_BANK_KEY), JSON.stringify(nextWords));
+  localStorage.setItem(getScopedKey(STORAGE_KEY), JSON.stringify(nextSets));
+  currentCards = currentCards.filter((card) => getWordKey(card) !== deletedWordKey);
+  if (getCloudConfig()) syncUserDataToCloud();
   renderWordList();
-  showStatus('Word deleted.', 'success');
+  renderSetList();
+  showStatus('Word deleted from your word bank and sets.', 'success');
 }
 
 function deleteAllWords() {
