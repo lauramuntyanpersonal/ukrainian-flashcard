@@ -668,10 +668,19 @@ function deleteAllWords() {
     return;
   }
 
-  if (!window.confirm('Delete all words from your word bank? This cannot be undone.')) return;
-  saveWordBank([]);
+  if (!window.confirm('Delete all words and flashcard sets? This cannot be undone.')) return;
+  localStorage.setItem(getScopedKey(WORD_BANK_KEY), JSON.stringify([]));
+  localStorage.setItem(getScopedKey(STORAGE_KEY), JSON.stringify([]));
+  localStorage.setItem(getScopedKey(CONTEXT_PROGRESS_KEY), JSON.stringify({}));
+  localStorage.setItem(getScopedKey(CONJUGATION_USED_WORDS_KEY), JSON.stringify({}));
+  currentSetId = null;
+  currentCards = [];
+  contextProgress = null;
+  contextQueue = [];
   renderWordList();
-  showStatus('All words deleted.', 'success');
+  renderSetList();
+  if (getCloudConfig()) syncUserDataToCloud();
+  showStatus('All words and sets deleted.', 'success');
 }
 
 function getWordSortPreference() {
