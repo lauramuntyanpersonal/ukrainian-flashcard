@@ -120,6 +120,7 @@ function readConjugationUsedWords() {
 
 function saveConjugationUsedWords(usedWords) {
   localStorage.setItem(getScopedKey(CONJUGATION_USED_WORDS_KEY), JSON.stringify(usedWords));
+  if (getCloudConfig()) syncUserDataToCloud();
 }
 
 function readContextProgress() {
@@ -136,6 +137,7 @@ function saveContextProgress() {
     ...readContextProgress(),
     [currentSetId]: contextProgress,
   }));
+  if (getCloudConfig()) syncUserDataToCloud();
 }
 
 function toId(value) {
@@ -222,6 +224,15 @@ function getCloudConfig() {
   return cfg;
 }
 
+function readScopedJson(baseKey, fallback) {
+  try {
+    const raw = localStorage.getItem(getScopedKey(baseKey));
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (error) {
+    return fallback;
+  }
+}
+
 async function syncUserDataFromCloud() {
   const cfg = getCloudConfig();
   const username = getCurrentUsername();
@@ -246,6 +257,8 @@ async function syncUserDataFromCloud() {
     const data = rows[0]?.data || { words: [], sets: [] };
     localStorage.setItem(getScopedKey(WORD_BANK_KEY), JSON.stringify(Array.isArray(data.words) ? data.words : []));
     localStorage.setItem(getScopedKey(STORAGE_KEY), JSON.stringify(Array.isArray(data.sets) ? data.sets : []));
+    localStorage.setItem(getScopedKey(CONTEXT_PROGRESS_KEY), JSON.stringify(data.contextProgress || {}));
+    localStorage.setItem(getScopedKey(CONJUGATION_USED_WORDS_KEY), JSON.stringify(data.conjugationUsedWords || {}));
 
     return data;
   } catch (error) {
@@ -261,11 +274,15 @@ async function syncUserDataToCloud() {
   try {
     const localWords = readWordBank();
     const localSets = readSets();
+    const contextProgress = readScopedJson(CONTEXT_PROGRESS_KEY, {});
+    const conjugationUsedWords = readScopedJson(CONJUGATION_USED_WORDS_KEY, {});
     const payload = {
       username,
       data: {
         words: Array.isArray(localWords) ? localWords : [],
         sets: Array.isArray(localSets) ? localSets : [],
+        contextProgress,
+        conjugationUsedWords,
       },
     };
 
