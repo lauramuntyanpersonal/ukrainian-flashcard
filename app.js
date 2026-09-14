@@ -57,9 +57,7 @@ const contextConfetti = document.getElementById('context-confetti');
 const conjugationGame = document.getElementById('conjugation-game');
 const conjugationGameTitle = document.getElementById('conjugation-game-title');
 const conjugationGameProgress = document.getElementById('conjugation-game-progress');
-const conjugationGameInfinitive = document.getElementById('conjugation-game-infinitive');
 const conjugationGameSentence = document.getElementById('conjugation-game-sentence');
-const conjugationGameAnswer = document.getElementById('conjugation-game-answer');
 const conjugationGameSubmit = document.getElementById('conjugation-game-submit');
 const conjugationGameFeedback = document.getElementById('conjugation-game-feedback');
 const studyActions = document.querySelector('.study-actions');
@@ -106,6 +104,7 @@ let contextProgress = null;
 let contextQueue = [];
 let conjugationExercise = null;
 let conjugationBlankIndex = 0;
+let conjugationAnswers = {};
 
 function readContextProgress() {
   try {
@@ -1454,15 +1453,17 @@ function renderConjugationParagraph() {
 
   const paragraph = String(conjugationExercise.paragraph || '');
   const paragraphHtml = escapeHtml(paragraph).replace(/\{(\d+)\}/g, (_, index) => {
-    const isCurrent = Number(index) === conjugationBlankIndex;
-    return isCurrent ? '<strong class="conjugation-blank">___</strong>' : '<strong class="conjugation-blank muted">___</strong>';
+    const blankIndex = Number(index);
+    const item = conjugationExercise.blanks[blankIndex] || {};
+    const savedAnswer = escapeHtml(conjugationAnswers[blankIndex] || '');
+    return `<span class="conjugation-blank-wrap"><input class="conjugation-inline-answer" data-blank-index="${blankIndex}" value="${savedAnswer}" aria-label="Answer for ${escapeHtml(item.infinitive || 'word')}" lang="uk-UA" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" /><small>(${escapeHtml(item.infinitive || 'infinitive')})</small></span>`;
   });
 
   conjugationGameTitle.textContent = conjugationExercise.title || 'Fill in the paragraph';
   conjugationGameProgress.textContent = `Blank ${conjugationBlankIndex + 1} of ${conjugationExercise.blanks.length}`;
-  conjugationGameInfinitive.textContent = `Infinitive: ${blank.infinitive}`;
   conjugationGameSentence.innerHTML = paragraphHtml;
-  conjugationGameAnswer.value = '';
+  const activeInput = conjugationGameSentence.querySelector(`[data-blank-index="${conjugationBlankIndex}"]`);
+  activeInput?.focus({ preventScroll: true });
   conjugationGameFeedback.textContent = '';
   conjugationGameFeedback.className = 'status';
   conjugationGame.classList.remove('context-game-retry-active');
@@ -1490,6 +1491,7 @@ async function startConjugationGame() {
   try {
     conjugationExercise = await requestConjugationExercise();
     conjugationBlankIndex = 0;
+    conjugationAnswers = {};
     renderConjugationParagraph();
   } catch (error) {
     conjugationGameFeedback.textContent = `Could not create the paragraph: ${error.message}`;
@@ -1501,8 +1503,10 @@ async function validateConjugationAnswer() {
   const blank = conjugationExercise?.blanks?.[conjugationBlankIndex];
   if (!blank) return;
 
-  const typedAnswer = conjugationGameAnswer.value.trim();
+  const activeInput = conjugationGameSentence.querySelector(`[data-blank-index="${conjugationBlankIndex}"]`);
+  const typedAnswer = activeInput?.value.trim() || '';
   if (!typedAnswer) return;
+  conjugationAnswers[conjugationBlankIndex] = typedAnswer;
 
   const config = window.FLASHCARDS_CONFIG || {};
   if (!config.supabaseUrl || !config.supabaseAnonKey) {
@@ -1858,8 +1862,8 @@ if (conjugationGameSubmit) {
   conjugationGameSubmit.addEventListener('click', validateConjugationAnswer);
 }
 
-if (conjugationGameAnswer) {
-  conjugationGameAnswer.addEventListener('keydown', (event) => {
+if (conjugationGameSentence) {
+  conjugationGameSentence.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
       validateConjugationAnswer();
