@@ -1635,8 +1635,12 @@ async function startConjugationGame() {
 function startSmashGame() {
   if (!currentCards.length) return;
 
+  app.classList.add('hidden');
+  studyPanel.classList.remove('hidden');
   studyPanel.classList.add('context-writing-active');
   studyPanel.classList.remove('keyboard-visible');
+  if (tabBar) tabBar.classList.add('hidden');
+  if (navBackButton) navBackButton.classList.remove('hidden');
   app.classList.add('hidden');
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');

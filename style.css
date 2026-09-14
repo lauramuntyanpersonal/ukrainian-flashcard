@@ -147,6 +147,7 @@ body {
   border-radius: 8px;
   font-size: 0.95rem;
   line-height: 1;
+  color: var(--primary);
 }
 
 .study-settings-menu {
