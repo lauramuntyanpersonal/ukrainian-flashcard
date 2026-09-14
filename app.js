@@ -484,7 +484,7 @@ function makeCard(raw, idx) {
   const front = getFirstNonEmpty(raw, ['lemme', 'lemma', 'word', 'term', 'text', 'ukrainian', 'front', 'f', 'column_f']);
   const back = getFirstNonEmpty(raw, ['definition', 'word_definition', 'meaning', 'def', 'translation', 'english', 'back', 'i', 'column_i']);
   const phrase = getFirstNonEmpty(raw, ['subtitle', 'phrase', 'example', 'sentence', 'context', 'c', 'column_c']);
-  const phraseTranslation = getFirstNonEmpty(raw, ['phrase_translation', 'example_en', 'translation_phrase', 'context_en', 'sentence_translation']);
+  const phraseTranslation = getFirstNonEmpty(raw, ['subtitle_translation', 'subtitle_en', 'phrase_translation', 'example_en', 'translation_phrase', 'context_en', 'sentence_translation']);
   const note = getFirstNonEmpty(raw, ['note', 'notes', 'comment', 'category', 'part_of_speech']);
 
   if (!front || (!back && !phrase && !note)) return null;
