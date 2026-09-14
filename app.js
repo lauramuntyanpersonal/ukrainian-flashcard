@@ -1995,7 +1995,8 @@ backButton.addEventListener('click', () => {
   const smashGameIsOpen = smashGame && !smashGame.classList.contains('hidden');
   const smashResultsAreOpen = smashResults && !smashResults.classList.contains('hidden');
   const contextResultsAreOpen = contextResults && !contextResults.classList.contains('hidden');
-  if (contextGameIsOpen || conjugationGameIsOpen || smashGameIsOpen || smashResultsAreOpen || contextResultsAreOpen) {
+  const flashcardStudyIsOpen = flashcard && !flashcard.classList.contains('hidden');
+  if (contextGameIsOpen || conjugationGameIsOpen || smashGameIsOpen || smashResultsAreOpen || contextResultsAreOpen || flashcardStudyIsOpen) {
     showStudyOptions();
     return;
   }
@@ -2248,6 +2249,10 @@ if (shuffleCardsButton) {
     flipped = false;
     if (studySettingsMenu) studySettingsMenu.classList.add('hidden');
     if (contextGame && !contextGame.classList.contains('hidden')) {
+      contextQueue = shuffledCopy(contextQueue);
+      contextProgress.queue = contextQueue;
+      contextProgress.position = 0;
+      saveContextProgress();
       renderContextGameCard();
     } else {
       renderCurrentCard();
