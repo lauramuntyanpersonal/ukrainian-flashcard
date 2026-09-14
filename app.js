@@ -1455,7 +1455,7 @@ async function requestConjugationExercise() {
   const config = window.FLASHCARDS_CONFIG || {};
   const allWordIds = currentCards.map((card) => card.front);
   const usedWords = readConjugationUsedWords();
-  let availableCards = currentCards.filter((card) => !usedWords[currentSetId]?.includes(card.id || card.front));
+  let availableCards = currentCards.filter((card) => !usedWords[currentSetId]?.includes(card.front));
 
   if (!availableCards.length) {
     usedWords[currentSetId] = [];
