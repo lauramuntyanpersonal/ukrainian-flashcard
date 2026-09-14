@@ -33,6 +33,7 @@ const navBackButton = document.getElementById('nav-back-button');
 const deleteCardButton = document.getElementById('delete-card-btn');
 const beginStudyButton = document.getElementById('begin-study-btn');
 const contextGameStartButton = document.getElementById('context-game-start-btn');
+const conjugationGameStartButton = document.getElementById('conjugation-game-start-btn');
 const studySetHeaderButton = document.getElementById('study-set-header-button');
 const studySettingsButton = document.getElementById('study-settings-button');
 const studySettingsMenu = document.getElementById('study-settings-menu');
@@ -53,6 +54,12 @@ const contextResultsScore = document.getElementById('context-results-score');
 const contextResultsMistakes = document.getElementById('context-results-mistakes');
 const contextResultsContinue = document.getElementById('context-results-continue');
 const contextConfetti = document.getElementById('context-confetti');
+const conjugationGame = document.getElementById('conjugation-game');
+const conjugationGameInfinitive = document.getElementById('conjugation-game-infinitive');
+const conjugationGameSentence = document.getElementById('conjugation-game-sentence');
+const conjugationGameAnswer = document.getElementById('conjugation-game-answer');
+const conjugationGameSubmit = document.getElementById('conjugation-game-submit');
+const conjugationGameFeedback = document.getElementById('conjugation-game-feedback');
 const studyActions = document.querySelector('.study-actions');
 const studyFooter = document.querySelector('.study-footer');
 const tabButtons = document.querySelectorAll('.tab-button');
@@ -1195,10 +1202,12 @@ function showMainView() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
+  if (conjugationGameStartButton) conjugationGameStartButton.classList.add('hidden');
   if (contextGameEnd) contextGameEnd.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
+  if (conjugationGame) conjugationGame.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
   if (studyTitle) studyTitle.classList.remove('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
@@ -1237,6 +1246,7 @@ function showSetReviewMode() {
   if (studySetHeaderButton) studySetHeaderButton.classList.remove('hidden');
   if (studySettingsButton) studySettingsButton.classList.add('hidden');
   if (studySettingsMenu) studySettingsMenu.classList.add('hidden');
+  if (conjugationGameStartButton) conjugationGameStartButton.classList.add('hidden');
   if (flashcard) flashcard.classList.add('hidden');
   if (studyActions) studyActions.classList.add('hidden');
   if (studyFooter) studyFooter.classList.add('hidden');
@@ -1261,6 +1271,7 @@ function showContextResults(completed = false) {
   if (studySettingsButton) studySettingsButton.classList.add('hidden');
   if (contextGameEnd) contextGameEnd.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
+  if (conjugationGame) conjugationGame.classList.add('hidden');
   if (contextResults) contextResults.classList.remove('hidden');
   contextResultsTitle.textContent = completed ? 'You finished the game!' : 'Context word results';
   if (contextConfetti) {
@@ -1281,8 +1292,10 @@ function showStudyOptions() {
   if (studySettingsMenu) studySettingsMenu.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.remove('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.remove('hidden');
+  if (conjugationGameStartButton) conjugationGameStartButton.classList.remove('hidden');
   if (contextGameEnd) contextGameEnd.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
+  if (conjugationGame) conjugationGame.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
 }
 
@@ -1292,11 +1305,13 @@ function beginStudySession() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
+  if (conjugationGameStartButton) conjugationGameStartButton.classList.add('hidden');
   if (contextGameEnd) contextGameEnd.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (studySettingsButton) studySettingsButton.classList.remove('hidden');
   if (studyTitle) studyTitle.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
+  if (conjugationGame) conjugationGame.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
   if (studyActions) studyActions.classList.remove('hidden');
@@ -1385,6 +1400,95 @@ function startContextWritingGame() {
   contextQueue = contextProgress.queue;
   currentIndex = 0;
   renderContextGameCard();
+}
+
+function getConjugationSentence(card) {
+  const source = card.phrase || `Use the word ${card.front} in context.`;
+  const escapedFront = String(card.front || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escapedFront ? source.replace(new RegExp(escapedFront, 'i'), '___') : source;
+}
+
+function startConjugationGame() {
+  if (!currentCards.length) return;
+  studyPanel.classList.add('context-writing-active');
+  studyPanel.classList.remove('keyboard-visible');
+  if (setReviewList) setReviewList.classList.add('hidden');
+  if (beginStudyButton) beginStudyButton.classList.add('hidden');
+  if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
+  if (conjugationGameStartButton) conjugationGameStartButton.classList.add('hidden');
+  if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
+  if (studySettingsButton) studySettingsButton.classList.add('hidden');
+  if (studyTitle) studyTitle.classList.add('hidden');
+  if (contextGame) contextGame.classList.add('hidden');
+  if (contextResults) contextResults.classList.add('hidden');
+  if (flashcard) flashcard.classList.add('hidden');
+  if (studyActions) studyActions.classList.add('hidden');
+  if (studyFooter) studyFooter.classList.add('hidden');
+  if (conjugationGame) conjugationGame.classList.remove('hidden');
+  currentIndex = 0;
+  renderConjugationCard();
+}
+
+function renderConjugationCard() {
+  const card = currentCards[currentIndex];
+  if (!card) return;
+  conjugationGameInfinitive.textContent = `Infinitive: ${card.front}`;
+  conjugationGameSentence.textContent = getConjugationSentence(card);
+  conjugationGameAnswer.value = '';
+  conjugationGameFeedback.textContent = '';
+  conjugationGameFeedback.className = 'status';
+}
+
+async function validateConjugationAnswer() {
+  const card = currentCards[currentIndex];
+  if (!card) return;
+
+  const typedAnswer = conjugationGameAnswer.value.trim();
+  if (!typedAnswer) return;
+
+  const config = window.FLASHCARDS_CONFIG || {};
+  if (!config.supabaseUrl || !config.supabaseAnonKey) {
+    conjugationGameFeedback.textContent = 'Supabase is not configured yet.';
+    conjugationGameFeedback.className = 'status error';
+    return;
+  }
+
+  conjugationGameSubmit.disabled = true;
+  conjugationGameFeedback.textContent = 'Checking grammar...';
+  conjugationGameFeedback.className = 'status';
+
+  try {
+    const response = await fetch(`${config.supabaseUrl}/functions/v1/validate-conjugation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: config.supabaseAnonKey,
+        Authorization: `Bearer ${config.supabaseAnonKey}`,
+      },
+      body: JSON.stringify({
+        sentence: getConjugationSentence(card),
+        infinitive: card.front,
+        typedAnswer,
+        grammar: 'Choose the grammatically correct Ukrainian form for this context.',
+        learnerGender: 'unknown',
+      }),
+    });
+
+    const result = await response.json();
+    if (!response.ok || result.error) {
+      throw new Error(result.error || 'Validation failed');
+    }
+
+    conjugationGameFeedback.textContent = result.correct
+      ? `Correct! ${result.explanation || ''}`
+      : `Try again. ${result.explanation || `Correct form: ${result.correctedAnswer || 'see the context'}`}`;
+    conjugationGameFeedback.className = `status ${result.correct ? 'success' : 'error'}`;
+  } catch (error) {
+    conjugationGameFeedback.textContent = `The grammar check failed: ${error.message}`;
+    conjugationGameFeedback.className = 'status error';
+  } finally {
+    conjugationGameSubmit.disabled = false;
+  }
 }
 
 function updateContextKeyboardLayout() {
@@ -1569,8 +1673,9 @@ selectAllRowsButton.addEventListener('click', () => {
 });
 backButton.addEventListener('click', () => {
   const contextGameIsOpen = contextGame && !contextGame.classList.contains('hidden');
+  const conjugationGameIsOpen = conjugationGame && !conjugationGame.classList.contains('hidden');
   const contextResultsAreOpen = contextResults && !contextResults.classList.contains('hidden');
-  if (contextGameIsOpen || contextResultsAreOpen) {
+  if (contextGameIsOpen || conjugationGameIsOpen || contextResultsAreOpen) {
     showStudyOptions();
     return;
   }
@@ -1675,6 +1780,23 @@ if (beginStudyButton) {
 
 if (contextGameStartButton) {
   contextGameStartButton.addEventListener('click', startContextWritingGame);
+}
+
+if (conjugationGameStartButton) {
+  conjugationGameStartButton.addEventListener('click', startConjugationGame);
+}
+
+if (conjugationGameSubmit) {
+  conjugationGameSubmit.addEventListener('click', validateConjugationAnswer);
+}
+
+if (conjugationGameAnswer) {
+  conjugationGameAnswer.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      validateConjugationAnswer();
+    }
+  });
 }
 
 function checkContextAnswer() {

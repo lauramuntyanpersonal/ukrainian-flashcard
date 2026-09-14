@@ -169,6 +169,7 @@
         <div id="set-review-list" class="set-review-list hidden"></div>
         <button id="begin-study-btn" class="primary hidden" type="button">Study Flashcards</button>
         <button id="context-game-start-btn" class="secondary hidden" type="button">Write the Context Word</button>
+        <button id="conjugation-game-start-btn" class="secondary hidden" type="button">Conjugation Station</button>
 
         <div id="context-game" class="context-game hidden">
           <p class="game-kicker">Write the word from the context</p>
@@ -191,6 +192,18 @@
           <div id="context-results-mistakes" class="context-results-mistakes"></div>
           <button id="context-results-continue" class="primary" type="button">Continue practice</button>
           <div id="context-confetti" class="context-confetti" aria-hidden="true"></div>
+        </div>
+
+        <div id="conjugation-game" class="context-game hidden">
+          <p class="game-kicker">Conjugation Station</p>
+          <p id="conjugation-game-infinitive" class="context-game-retry"></p>
+          <p id="conjugation-game-sentence" class="context-game-phrase"></p>
+          <label for="conjugation-game-answer">Type the correct Ukrainian form</label>
+          <div class="context-answer-row">
+            <input id="conjugation-game-answer" type="text" lang="uk-UA" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" />
+            <button id="conjugation-game-submit" class="context-submit-button" type="button" aria-label="Validate answer" title="Validate answer">→</button>
+          </div>
+          <p id="conjugation-game-feedback" class="status" aria-live="polite"></p>
         </div>
 
         <div id="flashcard" class="flashcard" aria-live="polite">
