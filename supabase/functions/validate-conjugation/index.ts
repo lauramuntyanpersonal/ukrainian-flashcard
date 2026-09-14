@@ -54,6 +54,7 @@ Return JSON only in this format:
 {
   "title": "short English title",
   "paragraph": "Ukrainian paragraph with placeholders {0}, {1}, etc.",
+  "translation": "English translation of the complete paragraph",
   "blanks": [
     {
       "index": 0,
@@ -72,6 +73,7 @@ Rules:
 - For verbs, the blank must contain an inflected/conjugated form, never the raw infinitive.
 - For nouns or adjectives, use an appropriate declined or inflected form and explain the case.
 - The paragraph must be natural Ukrainian.
+- Include a natural English translation of the complete paragraph.
 - Every placeholder must have exactly one matching blanks entry.
 - Put the infinitive only in the metadata, not in place of the blank.
 - The answer field must be the inflected form used at that placeholder.

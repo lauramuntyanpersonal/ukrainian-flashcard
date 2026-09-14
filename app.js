@@ -57,6 +57,8 @@ const contextConfetti = document.getElementById('context-confetti');
 const conjugationGame = document.getElementById('conjugation-game');
 const conjugationGameTitle = document.getElementById('conjugation-game-title');
 const conjugationGameProgress = document.getElementById('conjugation-game-progress');
+const conjugationEnglishToggle = document.getElementById('conjugation-english-toggle');
+const conjugationGameEnglish = document.getElementById('conjugation-game-english');
 const conjugationGameSentence = document.getElementById('conjugation-game-sentence');
 const conjugationGameSubmit = document.getElementById('conjugation-game-submit');
 const conjugationGameFeedback = document.getElementById('conjugation-game-feedback');
@@ -1465,6 +1467,7 @@ function renderConjugationParagraph() {
 
   conjugationGameTitle.textContent = conjugationExercise.title || 'Fill in the paragraph';
   conjugationGameProgress.textContent = `Blank ${conjugationBlankIndex + 1} of ${conjugationExercise.blanks.length}`;
+  conjugationGameEnglish.textContent = conjugationExercise.translation || 'English translation is not available for this paragraph.';
   conjugationGameSentence.innerHTML = paragraphHtml;
   const activeInput = conjugationGameSentence.querySelector(`[data-blank-index="${conjugationBlankIndex}"]`);
   activeInput?.focus({ preventScroll: true });
@@ -1490,6 +1493,8 @@ async function startConjugationGame() {
   if (studyActions) studyActions.classList.add('hidden');
   if (studyFooter) studyFooter.classList.add('hidden');
   if (conjugationGame) conjugationGame.classList.remove('hidden');
+  if (conjugationGameEnglish) conjugationGameEnglish.classList.add('hidden');
+  if (conjugationEnglishToggle) conjugationEnglishToggle.textContent = 'English';
   conjugationGameFeedback.textContent = 'Creating your paragraph...';
   conjugationGameFeedback.className = 'status';
   try {
@@ -1561,14 +1566,16 @@ async function validateConjugationAnswer() {
     }
 
     if (result.correct) {
-      conjugationGameFeedback.textContent = `Correct! ${result.explanation || ''}`;
-      conjugationGameFeedback.className = 'status success';
+      const successMessage = `Correct! ${result.explanation || ''}`;
       conjugationBlankIndex += 1;
       if (conjugationBlankIndex < conjugationExercise.blanks.length) {
         renderConjugationParagraph();
+        conjugationGameFeedback.textContent = successMessage;
+        conjugationGameFeedback.className = 'status success';
       } else {
         conjugationGameProgress.textContent = 'Paragraph complete';
-        conjugationGameFeedback.textContent = 'You finished the paragraph!';
+        conjugationGameFeedback.textContent = `${successMessage} You finished the paragraph!`;
+        conjugationGameFeedback.className = 'status success';
       }
     } else {
       conjugationGameFeedback.textContent = `Try again. ${result.explanation || `Correct form: ${result.correctedAnswer || 'see the context'}`}`;
@@ -1883,6 +1890,13 @@ if (conjugationGameStartButton) {
 
 if (conjugationGameSubmit) {
   conjugationGameSubmit.addEventListener('click', validateConjugationAnswer);
+}
+
+if (conjugationEnglishToggle && conjugationGameEnglish) {
+  conjugationEnglishToggle.addEventListener('click', () => {
+    const isHidden = conjugationGameEnglish.classList.toggle('hidden');
+    conjugationEnglishToggle.textContent = isHidden ? 'English' : 'Hide English';
+  });
 }
 
 if (conjugationGameSentence) {

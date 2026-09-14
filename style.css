@@ -908,6 +908,18 @@ button.mini {
   text-align: left;
 }
 
+.conjugation-english {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--primary);
+  background: rgba(255, 255, 255, 0.55);
+  line-height: 1.5;
+}
+
+.conjugation-english.hidden {
+  display: none;
+}
+
 .conjugation-blank-wrap {
   display: inline-flex;
   align-items: baseline;
