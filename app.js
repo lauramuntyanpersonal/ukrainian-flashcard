@@ -678,11 +678,6 @@ function deleteWordByIndex(index) {
 }
 
 function deleteAllWords() {
-  if (!readWordBank().length) {
-    showStatus('There are no words to delete.');
-    return;
-  }
-
   if (!window.confirm('Delete all words and flashcard sets? This cannot be undone.')) return;
   localStorage.setItem(getScopedKey(WORD_BANK_KEY), JSON.stringify([]));
   localStorage.setItem(getScopedKey(STORAGE_KEY), JSON.stringify([]));
