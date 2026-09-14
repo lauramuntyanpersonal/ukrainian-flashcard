@@ -115,6 +115,39 @@ body {
   margin-top: 8px;
 }
 
+.study-game-options {
+  display: grid;
+  gap: 14px;
+  margin: 18px 0 22px;
+}
+
+.study-game-option {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-height: 58px;
+  text-align: left;
+}
+
+.study-game-option.hidden {
+  display: none;
+}
+
+.study-game-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
 .study-settings-menu {
   position: absolute;
   top: calc(100% + 8px);
