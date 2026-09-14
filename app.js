@@ -238,16 +238,14 @@ async function syncUserDataFromCloud() {
 
     if (!response.ok) return null;
     const rows = await response.json();
-    if (!rows || !rows.length) return null;
+    if (!rows || !rows.length) {
+      await syncUserDataToCloud();
+      return null;
+    }
 
     const data = rows[0]?.data || { words: [], sets: [] };
-    const hasLocalWordData = !!localStorage.getItem(getScopedKey(WORD_BANK_KEY));
-    const hasLocalSetData = !!localStorage.getItem(getScopedKey(STORAGE_KEY));
-
-    if (!hasLocalWordData || !hasLocalSetData) {
-      localStorage.setItem(getScopedKey(WORD_BANK_KEY), JSON.stringify(Array.isArray(data.words) ? data.words : []));
-      localStorage.setItem(getScopedKey(STORAGE_KEY), JSON.stringify(Array.isArray(data.sets) ? data.sets : []));
-    }
+    localStorage.setItem(getScopedKey(WORD_BANK_KEY), JSON.stringify(Array.isArray(data.words) ? data.words : []));
+    localStorage.setItem(getScopedKey(STORAGE_KEY), JSON.stringify(Array.isArray(data.sets) ? data.sets : []));
 
     return data;
   } catch (error) {
@@ -2163,7 +2161,10 @@ removeLegacyDemoSetsFromStorage();
 updateUsernameStatus();
 ensureUsernamePrompt();
 if (getCloudConfig()) {
-  syncUserDataFromCloud();
+  syncUserDataFromCloud().then(() => {
+    renderWordList();
+    renderSetList();
+  });
 }
 setActiveTab('words');
 
