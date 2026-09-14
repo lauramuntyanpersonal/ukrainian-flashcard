@@ -160,6 +160,13 @@ function getSmashWordType(card) {
   return 'unknown';
 }
 
+function formatSmashLabel(value) {
+  const text = String(value || '');
+  const escaped = escapeHtml(text);
+  if (text.length <= 14) return escaped;
+  return escaped.replace(/(.{10})(?=.)/g, '$1-<wbr>');
+}
+
 function readContextProgress() {
   try {
     const allProgress = JSON.parse(localStorage.getItem(getScopedKey(CONTEXT_PROGRESS_KEY)) || '{}');
@@ -1691,7 +1698,7 @@ function renderSmashRound() {
   smashRound.textContent = `Round ${smashRoundIndex + 1} of 10`;
   smashFeedback.textContent = '';
   smashFeedback.className = 'status';
-  smashGrid.innerHTML = choices.map((card) => `<button class="smash-choice" type="button" data-card-id="${card.id}">${smashPromptLanguage === 'en' ? card.front : card.back}</button>`).join('');
+  smashGrid.innerHTML = choices.map((card) => `<button class="smash-choice" type="button" data-card-id="${card.id}">${formatSmashLabel(smashPromptLanguage === 'en' ? card.front : card.back)}</button>`).join('');
   smashRoundStartedAt = performance.now();
   window.clearInterval(smashTimerId);
   smashTimerId = window.setInterval(() => {

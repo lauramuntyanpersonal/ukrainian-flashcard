@@ -916,6 +916,7 @@ button.mini {
 
 .smash-choice {
   min-height: 76px;
+  min-width: 0;
   padding: 8px;
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -923,6 +924,10 @@ button.mini {
   color: var(--text);
   font-size: 1rem;
   font-weight: 700;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
   transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
 }
 
