@@ -125,6 +125,15 @@ function saveConjugationUsedWords(usedWords) {
   if (getCloudConfig()) syncUserDataToCloud();
 }
 
+function shuffledCopy(items) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
 function readContextProgress() {
   try {
     const allProgress = JSON.parse(localStorage.getItem(getScopedKey(CONTEXT_PROGRESS_KEY)) || '{}');
@@ -1455,12 +1464,12 @@ async function requestConjugationExercise() {
   const config = window.FLASHCARDS_CONFIG || {};
   const allWordIds = currentCards.map((card) => card.front);
   const usedWords = readConjugationUsedWords();
-  let availableCards = currentCards.filter((card) => !usedWords[currentSetId]?.includes(card.front));
+  let availableCards = shuffledCopy(currentCards.filter((card) => !usedWords[currentSetId]?.includes(card.front)));
 
   if (!availableCards.length) {
     usedWords[currentSetId] = [];
     saveConjugationUsedWords(usedWords);
-    availableCards = [...currentCards];
+    availableCards = shuffledCopy(currentCards);
   }
 
   const wordCount = Math.min(10, availableCards.length);
