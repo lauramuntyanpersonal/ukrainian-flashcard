@@ -26,6 +26,7 @@ html, body {
 
 body {
   min-height: 100vh;
+  background: #ffffff;
 }
 
 .app-shell {
@@ -812,7 +813,7 @@ button.mini {
   padding-bottom: 0;
   border: 0;
   border-radius: 0;
-  background: #edf3ff;
+  background: #ffffff;
   box-shadow: none;
   overflow: hidden;
   overscroll-behavior: none;
@@ -1125,12 +1126,12 @@ button.mini {
 
 .badge {
   display: inline-block;
-  margin-bottom: 16px;
-  padding: 6px 10px;
+  margin-bottom: 12px;
+  padding: 4px 7px;
   border-radius: 999px;
   background: rgba(36, 71, 246, 0.12);
   color: var(--primary-dark);
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1172,7 +1173,7 @@ button.mini {
 
 @media (max-width: 640px) {
   body {
-    background: #edf3ff;
+    background: #ffffff;
   }
 
   .app-shell {
