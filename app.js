@@ -1398,6 +1398,9 @@ function showStudyOptions() {
   if (smashGame) smashGame.classList.add('hidden');
   if (smashResults) smashResults.classList.add('hidden');
   if (smashLanguageToggle) smashLanguageToggle.classList.add('hidden');
+  if (flashcard) flashcard.classList.add('hidden');
+  if (studyActions) studyActions.classList.add('hidden');
+  if (studyFooter) studyFooter.classList.add('hidden');
   if (studyGameOptions) studyGameOptions.classList.remove('hidden');
   if (contextResults) contextResults.classList.add('hidden');
 }
