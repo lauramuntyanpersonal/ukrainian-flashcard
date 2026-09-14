@@ -38,6 +38,7 @@ const contextGameStartButton = document.getElementById('context-game-start-btn')
 const conjugationGameStartButton = document.getElementById('conjugation-game-start-btn');
 const smashGameStartButton = document.getElementById('smash-game-start-btn');
 const studySetHeaderButton = document.getElementById('study-set-header-button');
+const studyGameOptions = document.getElementById('study-game-options');
 const studySettingsButton = document.getElementById('study-settings-button');
 const studySettingsMenu = document.getElementById('study-settings-menu');
 const shuffleCardsButton = document.getElementById('shuffle-cards-button');
@@ -1296,6 +1297,7 @@ function showMainView() {
   if (conjugationGame) conjugationGame.classList.add('hidden');
   if (smashGame) smashGame.classList.add('hidden');
   if (smashResults) smashResults.classList.add('hidden');
+  if (studyGameOptions) studyGameOptions.classList.add('hidden');
   if (smashLanguageToggle) smashLanguageToggle.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
   if (studyTitle) studyTitle.classList.remove('hidden');
@@ -1326,6 +1328,7 @@ function renderSetReviewList() {
 }
 
 function showSetReviewMode() {
+  if (studyGameOptions) studyGameOptions.classList.add('hidden');
   if (studyTitle) studyTitle.classList.remove('hidden');
   if (setReviewList) {
     setReviewList.classList.remove('hidden');
@@ -1395,6 +1398,7 @@ function showStudyOptions() {
   if (smashGame) smashGame.classList.add('hidden');
   if (smashResults) smashResults.classList.add('hidden');
   if (smashLanguageToggle) smashLanguageToggle.classList.add('hidden');
+  if (studyGameOptions) studyGameOptions.classList.remove('hidden');
   if (contextResults) contextResults.classList.add('hidden');
 }
 
@@ -1415,6 +1419,7 @@ function beginStudySession() {
   if (smashGame) smashGame.classList.add('hidden');
   if (smashResults) smashResults.classList.add('hidden');
   if (smashLanguageToggle) smashLanguageToggle.classList.add('hidden');
+  if (studyGameOptions) studyGameOptions.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
   if (studyActions) studyActions.classList.remove('hidden');
@@ -1488,6 +1493,7 @@ function startContextWritingGame() {
   studyPanel.classList.remove('keyboard-visible');
   contextInitialViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
   if (setReviewList) setReviewList.classList.add('hidden');
+  if (studyGameOptions) studyGameOptions.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (studySettingsButton) studySettingsButton.classList.remove('hidden');
@@ -1618,6 +1624,7 @@ async function startConjugationGame() {
   studyPanel.classList.add('context-writing-active');
   studyPanel.classList.remove('keyboard-visible');
   if (setReviewList) setReviewList.classList.add('hidden');
+  if (studyGameOptions) studyGameOptions.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
   if (conjugationGameStartButton) conjugationGameStartButton.classList.add('hidden');
@@ -1656,6 +1663,7 @@ function startSmashGame() {
   studyPanel.classList.add('context-writing-active');
   studyPanel.classList.remove('keyboard-visible');
   if (tabBar) tabBar.classList.add('hidden');
+  if (studyGameOptions) studyGameOptions.classList.add('hidden');
   if (navBackButton) navBackButton.classList.remove('hidden');
   app.classList.add('hidden');
   if (setReviewList) setReviewList.classList.add('hidden');
