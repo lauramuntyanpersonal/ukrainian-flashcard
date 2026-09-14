@@ -820,11 +820,6 @@ button.mini {
   position: relative;
 }
 
-.context-game-end {
-  justify-self: start;
-  margin-top: 4px;
-}
-
 .context-results {
   display: grid;
   gap: 10px;

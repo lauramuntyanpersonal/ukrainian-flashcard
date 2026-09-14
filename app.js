@@ -1193,6 +1193,7 @@ function showMainView() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
+  if (contextGameEnd) contextGameEnd.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
@@ -1270,6 +1271,7 @@ function showStudyOptions() {
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.remove('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.remove('hidden');
+  if (contextGameEnd) contextGameEnd.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
 }
@@ -1280,6 +1282,7 @@ function beginStudySession() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
+  if (contextGameEnd) contextGameEnd.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (studyTitle) studyTitle.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
@@ -1361,6 +1364,7 @@ function startContextWritingGame() {
   if (studyActions) studyActions.classList.add('hidden');
   if (studyFooter) studyFooter.classList.add('hidden');
   if (contextGame) contextGame.classList.remove('hidden');
+  if (contextGameEnd) contextGameEnd.classList.remove('hidden');
   if (contextResults) contextResults.classList.add('hidden');
   const savedProgress = readContextProgress()[currentSetId];
   contextProgress = buildContextProgress(savedProgress);
