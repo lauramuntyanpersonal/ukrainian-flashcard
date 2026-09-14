@@ -900,7 +900,8 @@ button.mini {
 }
 
 .conjugation-paragraph {
-  height: min(58vh, 460px);
+  height: min(72vh, 620px);
+  min-height: 320px;
   overflow-y: auto;
   font-size: 1.15rem;
   line-height: 2.2;
