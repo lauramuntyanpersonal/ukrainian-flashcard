@@ -299,7 +299,7 @@ input[type="text"], input[type="file"] {
   border: 1px dashed var(--border);
   border-radius: 12px;
   padding: 12px 14px;
-  background: var(--panel-alt);
+  background: #ffffff;
 }
 
 button {
@@ -1102,7 +1102,7 @@ button.mini {
   position: relative;
   min-height: 320px;
   border-radius: 16px;
-  background: var(--panel-alt);
+  background: #ffffff;
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   overflow: hidden;
@@ -1121,7 +1121,7 @@ button.mini {
 }
 
 .back-side {
-  background: var(--panel-alt);
+  background: #ffffff;
 }
 
 .badge {
