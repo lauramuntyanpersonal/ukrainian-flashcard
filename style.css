@@ -820,43 +820,6 @@ button.mini {
   position: relative;
 }
 
-.context-game-option {
-  position: relative;
-  display: flex;
-  margin: 10px 0;
-  overflow: hidden;
-}
-
-.context-game-option.hidden {
-  display: none;
-}
-
-.context-game-option #context-game-start-btn {
-  flex: 1;
-}
-
-.context-results-option {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 92px;
-  border: 0;
-  border-radius: 0;
-  background: var(--success);
-  color: white;
-  transform: translateX(100%);
-  transition: transform 0.2s ease;
-}
-
-.context-game-option.results-revealed .context-results-option {
-  transform: translateX(0);
-}
-
-.context-game-option.results-revealed #context-game-start-btn {
-  padding-right: 100px;
-}
-
 .context-results-reveal {
   position: absolute;
   top: 50%;

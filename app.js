@@ -33,7 +33,6 @@ const navBackButton = document.getElementById('nav-back-button');
 const deleteCardButton = document.getElementById('delete-card-btn');
 const beginStudyButton = document.getElementById('begin-study-btn');
 const contextGameStartButton = document.getElementById('context-game-start-btn');
-const contextGameOption = document.getElementById('context-game-option');
 const studySetHeaderButton = document.getElementById('study-set-header-button');
 const studySettingsButton = document.getElementById('study-settings-button');
 const studySettingsMenu = document.getElementById('study-settings-menu');
@@ -46,7 +45,7 @@ const contextGameAnswer = document.getElementById('context-game-answer');
 const contextGameSubmit = document.getElementById('context-game-submit');
 const contextGameFeedback = document.getElementById('context-game-feedback');
 const contextGameNext = document.getElementById('context-game-next');
-const contextResultsOption = document.getElementById('context-results-option');
+const contextResultsReveal = document.getElementById('context-results-reveal');
 const contextResults = document.getElementById('context-results');
 const contextResultsScore = document.getElementById('context-results-score');
 const contextResultsMistakes = document.getElementById('context-results-mistakes');
@@ -1192,9 +1191,9 @@ function showMainView() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
-  if (contextGameOption) contextGameOption.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
+  if (contextResults) contextResults.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
   if (studyTitle) studyTitle.classList.remove('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
@@ -1249,10 +1248,7 @@ function renderContextResults() {
 }
 
 function showContextResults() {
-  const savedProgress = readContextProgress()[currentSetId];
-  contextProgress = savedProgress || { correct: 0, attempts: 0, mistakes: {}, index: 0, complete: false };
   if (contextGame) contextGame.classList.add('hidden');
-  if (contextGameOption) contextGameOption.classList.add('hidden');
   if (contextResults) contextResults.classList.remove('hidden');
   renderContextResults();
 }
@@ -1261,8 +1257,7 @@ function showStudyOptions() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.remove('hidden');
-  if (contextGameOption) contextGameOption.classList.remove('hidden');
-  if (contextResults) contextResults.classList.add('hidden');
+  if (contextGameStartButton) contextGameStartButton.classList.remove('hidden');
 }
 
 function beginStudySession() {
@@ -1271,7 +1266,6 @@ function beginStudySession() {
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
-  if (contextGameOption) contextGameOption.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (studyTitle) studyTitle.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
@@ -1302,8 +1296,6 @@ function startContextWritingGame() {
   if (!currentCards.length) return;
   studyPanel.classList.add('context-writing-active');
   studyPanel.classList.remove('keyboard-visible');
-  if (contextGameOption) contextGameOption.classList.add('hidden');
-  if (contextGameOption) contextGameOption.classList.remove('results-revealed');
   contextInitialViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
   if (setReviewList) setReviewList.classList.add('hidden');
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
@@ -1661,25 +1653,25 @@ if (contextGameNext) {
   contextGameNext.addEventListener('click', advanceContextGame);
 }
 
-if (contextGameOption) {
+if (contextResultsReveal) {
   let contextSwipeStartX = null;
 
-  contextGameOption.addEventListener('pointerdown', (event) => {
+  contextGame.addEventListener('pointerdown', (event) => {
     contextSwipeStartX = event.clientX;
   });
 
-  contextGameOption.addEventListener('pointerup', (event) => {
+  contextGame.addEventListener('pointerup', (event) => {
     if (contextSwipeStartX === null) return;
     const delta = event.clientX - contextSwipeStartX;
     contextSwipeStartX = null;
     if (delta < -48) {
-      contextGameOption.classList.add('results-revealed');
+      contextGame.classList.add('results-revealed');
     } else if (delta > 48) {
-      contextGameOption.classList.remove('results-revealed');
+      contextGame.classList.remove('results-revealed');
     }
   });
 
-  contextResultsOption.addEventListener('click', showContextResults);
+  contextResultsReveal.addEventListener('click', showContextResults);
 }
 
 if (contextResultsContinue) {
