@@ -1509,7 +1509,12 @@ async function validateConjugationAnswer() {
 
   const activeInput = conjugationGameSentence.querySelector(`[data-blank-index="${conjugationBlankIndex}"]`);
   const typedAnswer = activeInput?.value.trim() || '';
-  if (!typedAnswer) return;
+  if (!typedAnswer) {
+    conjugationGameFeedback.textContent = 'Type an answer first.';
+    conjugationGameFeedback.className = 'status error';
+    activeInput?.focus({ preventScroll: true });
+    return;
+  }
   conjugationAnswers[conjugationBlankIndex] = typedAnswer;
 
   const config = window.FLASHCARDS_CONFIG || {};
