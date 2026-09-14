@@ -1563,7 +1563,7 @@ async function validateConjugationAnswer() {
     return;
   }
 
-  conjugationGameFeedback.textContent = `${correctCount} of ${inputs.length} correct. Correct forms: ${wrongAnswers.join(' | ')}`;
+  conjugationGameFeedback.textContent = `${correctCount} of ${inputs.length} correct. Corrections: ${wrongAnswers.join(' | ')}`;
   conjugationGameFeedback.className = 'status error';
 }
 
