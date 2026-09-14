@@ -35,10 +35,12 @@ const deleteCardButton = document.getElementById('delete-card-btn');
 const beginStudyButton = document.getElementById('begin-study-btn');
 const contextGameStartButton = document.getElementById('context-game-start-btn');
 const conjugationGameStartButton = document.getElementById('conjugation-game-start-btn');
+const smashGameStartButton = document.getElementById('smash-game-start-btn');
 const studySetHeaderButton = document.getElementById('study-set-header-button');
 const studySettingsButton = document.getElementById('study-settings-button');
 const studySettingsMenu = document.getElementById('study-settings-menu');
 const shuffleCardsButton = document.getElementById('shuffle-cards-button');
+const smashLanguageToggle = document.getElementById('smash-language-toggle');
 const setReviewList = document.getElementById('set-review-list');
 const contextGame = document.getElementById('context-game');
 const contextGameMeaning = document.getElementById('context-game-meaning');
@@ -56,6 +58,15 @@ const contextResultsMistakes = document.getElementById('context-results-mistakes
 const contextResultsContinue = document.getElementById('context-results-continue');
 const contextConfetti = document.getElementById('context-confetti');
 const conjugationGame = document.getElementById('conjugation-game');
+const smashGame = document.getElementById('smash-game');
+const smashPrompt = document.getElementById('smash-prompt');
+const smashRound = document.getElementById('smash-round');
+const smashTimer = document.getElementById('smash-timer');
+const smashGrid = document.getElementById('smash-grid');
+const smashFeedback = document.getElementById('smash-feedback');
+const smashResults = document.getElementById('smash-results');
+const smashScore = document.getElementById('smash-score');
+const smashPlayAgain = document.getElementById('smash-play-again');
 const conjugationGameTitle = document.getElementById('conjugation-game-title');
 const conjugationEnglishToggle = document.getElementById('conjugation-english-toggle');
 const conjugationGameEnglish = document.getElementById('conjugation-game-english');
@@ -110,6 +121,12 @@ let contextQueue = [];
 let conjugationExercise = null;
 let conjugationBlankIndex = 0;
 let conjugationAnswers = {};
+let smashRoundIndex = 0;
+let smashScoreValue = 0;
+let smashPromptLanguage = 'en';
+let smashCurrentTarget = null;
+let smashRoundStartedAt = 0;
+let smashTimerId = null;
 
 function readConjugationUsedWords() {
   try {
@@ -1239,6 +1256,7 @@ function openSet(setId) {
 }
 
 function showMainView() {
+  window.clearInterval(smashTimerId);
   studyPanel.classList.add('hidden');
   studyPanel.classList.remove('context-writing-active');
   studyPanel.classList.remove('keyboard-visible');
@@ -1250,11 +1268,15 @@ function showMainView() {
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
   if (conjugationGameStartButton) conjugationGameStartButton.classList.add('hidden');
+  if (smashGameStartButton) smashGameStartButton.classList.add('hidden');
   if (contextGameEnd) contextGameEnd.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
   if (conjugationGame) conjugationGame.classList.add('hidden');
+  if (smashGame) smashGame.classList.add('hidden');
+  if (smashResults) smashResults.classList.add('hidden');
+  if (smashLanguageToggle) smashLanguageToggle.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
   if (studyTitle) studyTitle.classList.remove('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
@@ -1293,6 +1315,8 @@ function showSetReviewMode() {
   if (studySetHeaderButton) studySetHeaderButton.classList.remove('hidden');
   if (studySettingsButton) studySettingsButton.classList.add('hidden');
   if (studySettingsMenu) studySettingsMenu.classList.add('hidden');
+  if (smashLanguageToggle) smashLanguageToggle.classList.add('hidden');
+  if (smashGameStartButton) smashGameStartButton.classList.add('hidden');
   if (conjugationGameStartButton) conjugationGameStartButton.classList.add('hidden');
   if (flashcard) flashcard.classList.add('hidden');
   if (studyActions) studyActions.classList.add('hidden');
@@ -1319,6 +1343,9 @@ function showContextResults(completed = false) {
   if (contextGameEnd) contextGameEnd.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
   if (conjugationGame) conjugationGame.classList.add('hidden');
+  if (smashGame) smashGame.classList.add('hidden');
+  if (smashResults) smashResults.classList.add('hidden');
+  if (smashLanguageToggle) smashLanguageToggle.classList.add('hidden');
   if (contextResults) contextResults.classList.remove('hidden');
   contextResultsTitle.textContent = completed ? 'You finished the game!' : 'Context word results';
   if (contextConfetti) {
@@ -1330,6 +1357,7 @@ function showContextResults(completed = false) {
 }
 
 function showStudyOptions() {
+  window.clearInterval(smashTimerId);
   studyPanel.classList.remove('context-writing-active');
   studyPanel.classList.remove('keyboard-visible');
   if (studyTitle) studyTitle.classList.remove('hidden');
@@ -1340,9 +1368,13 @@ function showStudyOptions() {
   if (beginStudyButton) beginStudyButton.classList.remove('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.remove('hidden');
   if (conjugationGameStartButton) conjugationGameStartButton.classList.remove('hidden');
+  if (smashGameStartButton) smashGameStartButton.classList.remove('hidden');
   if (contextGameEnd) contextGameEnd.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
   if (conjugationGame) conjugationGame.classList.add('hidden');
+  if (smashGame) smashGame.classList.add('hidden');
+  if (smashResults) smashResults.classList.add('hidden');
+  if (smashLanguageToggle) smashLanguageToggle.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
 }
 
@@ -1353,12 +1385,16 @@ function beginStudySession() {
   if (beginStudyButton) beginStudyButton.classList.add('hidden');
   if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
   if (conjugationGameStartButton) conjugationGameStartButton.classList.add('hidden');
+  if (smashGameStartButton) smashGameStartButton.classList.add('hidden');
   if (contextGameEnd) contextGameEnd.classList.add('hidden');
   if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
   if (studySettingsButton) studySettingsButton.classList.remove('hidden');
   if (studyTitle) studyTitle.classList.add('hidden');
   if (contextGame) contextGame.classList.add('hidden');
   if (conjugationGame) conjugationGame.classList.add('hidden');
+  if (smashGame) smashGame.classList.add('hidden');
+  if (smashResults) smashResults.classList.add('hidden');
+  if (smashLanguageToggle) smashLanguageToggle.classList.add('hidden');
   if (contextResults) contextResults.classList.add('hidden');
   if (flashcard) flashcard.classList.remove('hidden');
   if (studyActions) studyActions.classList.remove('hidden');
@@ -1587,6 +1623,99 @@ async function startConjugationGame() {
   }
 }
 
+function startSmashGame() {
+  if (!currentCards.length) return;
+
+  studyPanel.classList.add('context-writing-active');
+  studyPanel.classList.remove('keyboard-visible');
+  app.classList.add('hidden');
+  if (setReviewList) setReviewList.classList.add('hidden');
+  if (beginStudyButton) beginStudyButton.classList.add('hidden');
+  if (contextGameStartButton) contextGameStartButton.classList.add('hidden');
+  if (conjugationGameStartButton) conjugationGameStartButton.classList.add('hidden');
+  if (smashGameStartButton) smashGameStartButton.classList.add('hidden');
+  if (studySetHeaderButton) studySetHeaderButton.classList.add('hidden');
+  if (studySettingsButton) studySettingsButton.classList.remove('hidden');
+  if (smashLanguageToggle) {
+    smashLanguageToggle.classList.remove('hidden');
+    smashLanguageToggle.textContent = smashPromptLanguage === 'en' ? 'Prompt: English' : 'Prompt: Ukrainian';
+  }
+  if (smashLanguageToggle) smashLanguageToggle.classList.remove('hidden');
+  if (studyTitle) studyTitle.classList.add('hidden');
+  if (flashcard) flashcard.classList.add('hidden');
+  if (studyActions) studyActions.classList.add('hidden');
+  if (studyFooter) studyFooter.classList.add('hidden');
+  if (contextGame) contextGame.classList.add('hidden');
+  if (conjugationGame) conjugationGame.classList.add('hidden');
+  if (contextResults) contextResults.classList.add('hidden');
+  if (smashResults) smashResults.classList.add('hidden');
+
+  smashRoundIndex = 0;
+  smashScoreValue = 0;
+  renderSmashRound();
+}
+
+function renderSmashRound() {
+  if (smashRoundIndex >= 10) {
+    finishSmashGame();
+    return;
+  }
+
+  const target = shuffledCopy(currentCards)[0];
+  const distractors = shuffledCopy(currentCards.filter((card) => card.id !== target.id)).slice(0, 8);
+  const choices = shuffledCopy([target, ...distractors]);
+  smashCurrentTarget = target;
+  smashPrompt.textContent = smashPromptLanguage === 'en' ? target.back : target.front;
+  smashRound.textContent = `Round ${smashRoundIndex + 1} of 10`;
+  smashFeedback.textContent = '';
+  smashFeedback.className = 'status';
+  smashGrid.innerHTML = choices.map((card) => `<button class="smash-choice" type="button" data-card-id="${card.id}">${smashPromptLanguage === 'en' ? card.front : card.back}</button>`).join('');
+  smashRoundStartedAt = performance.now();
+  window.clearInterval(smashTimerId);
+  smashTimerId = window.setInterval(() => {
+    smashTimer.textContent = `${((performance.now() - smashRoundStartedAt) / 1000).toFixed(1)}s`;
+  }, 100);
+}
+
+function handleSmashChoice(event) {
+  const choice = event.target.closest('.smash-choice');
+  if (!choice || choice.disabled) return;
+  const isCorrect = choice.dataset.cardId === smashCurrentTarget.id;
+  const elapsed = (performance.now() - smashRoundStartedAt) / 1000;
+  choice.disabled = true;
+
+  if (isCorrect) {
+    smashScoreValue += Math.max(1, Math.round(100 - elapsed * 10));
+    choice.classList.add('correct');
+    smashFeedback.textContent = 'Correct!';
+    smashFeedback.className = 'status success';
+    [...smashGrid.children].forEach((button) => { button.disabled = true; });
+    window.setTimeout(() => {
+      smashRoundIndex += 1;
+      renderSmashRound();
+    }, 450);
+  } else {
+    choice.classList.add('wrong');
+    smashFeedback.textContent = 'WRONG';
+    smashFeedback.className = 'status error';
+    window.setTimeout(() => {
+      choice.classList.remove('wrong');
+      choice.disabled = false;
+      smashFeedback.textContent = '';
+    }, 500);
+  }
+}
+
+function finishSmashGame() {
+  window.clearInterval(smashTimerId);
+  smashGrid.innerHTML = '';
+  smashGame.classList.add('hidden');
+  smashResults.classList.remove('hidden');
+  smashScore.textContent = `Score: ${smashScoreValue} points`;
+  if (studySettingsButton) studySettingsButton.classList.remove('hidden');
+  if (smashLanguageToggle) smashLanguageToggle.classList.remove('hidden');
+}
+
 async function validateConjugationAnswer() {
   const inputs = [...conjugationGameSentence.querySelectorAll('.conjugation-inline-answer')];
   const missing = inputs.filter((input) => !input.value.trim());
@@ -1809,8 +1938,10 @@ selectAllRowsButton.addEventListener('click', () => {
 backButton.addEventListener('click', () => {
   const contextGameIsOpen = contextGame && !contextGame.classList.contains('hidden');
   const conjugationGameIsOpen = conjugationGame && !conjugationGame.classList.contains('hidden');
+  const smashGameIsOpen = smashGame && !smashGame.classList.contains('hidden');
+  const smashResultsAreOpen = smashResults && !smashResults.classList.contains('hidden');
   const contextResultsAreOpen = contextResults && !contextResults.classList.contains('hidden');
-  if (contextGameIsOpen || conjugationGameIsOpen || contextResultsAreOpen) {
+  if (contextGameIsOpen || conjugationGameIsOpen || smashGameIsOpen || smashResultsAreOpen || contextResultsAreOpen) {
     showStudyOptions();
     return;
   }
@@ -1919,6 +2050,26 @@ if (contextGameStartButton) {
 
 if (conjugationGameStartButton) {
   conjugationGameStartButton.addEventListener('click', startConjugationGame);
+}
+
+if (smashGameStartButton) {
+  smashGameStartButton.addEventListener('click', startSmashGame);
+}
+
+if (smashGrid) {
+  smashGrid.addEventListener('click', handleSmashChoice);
+}
+
+if (smashLanguageToggle) {
+  smashLanguageToggle.addEventListener('click', () => {
+    smashPromptLanguage = smashPromptLanguage === 'en' ? 'uk' : 'en';
+    smashLanguageToggle.textContent = smashPromptLanguage === 'en' ? 'Prompt: English' : 'Prompt: Ukrainian';
+    if (smashGame && !smashGame.classList.contains('hidden')) renderSmashRound();
+  });
+}
+
+if (smashPlayAgain) {
+  smashPlayAgain.addEventListener('click', startSmashGame);
 }
 
 if (conjugationGameSubmit) {

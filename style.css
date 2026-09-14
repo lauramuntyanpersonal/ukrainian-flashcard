@@ -880,6 +880,68 @@ button.mini {
   color: var(--muted);
 }
 
+.smash-game {
+  display: grid;
+  gap: 12px;
+  margin: auto 0;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--panel-alt);
+}
+
+.smash-game.hidden {
+  display: none;
+}
+
+.smash-game h3,
+.smash-game p {
+  margin-bottom: 0;
+}
+
+.smash-meta {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.smash-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.smash-choice {
+  min-height: 76px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.smash-choice:hover,
+.smash-choice:focus-visible {
+  border-color: var(--primary);
+}
+
+.smash-choice.wrong {
+  background: #fee2e2;
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.smash-choice.correct {
+  background: #dcfce7;
+  border-color: var(--success);
+  color: #087443;
+}
+
 .context-confetti {
   position: relative;
   min-height: 26px;

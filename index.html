@@ -163,6 +163,7 @@
               <div id="study-settings-menu" class="study-settings-menu hidden">
                 <button id="shuffle-cards-button" class="secondary mini" type="button">Shuffle cards</button>
                 <button id="context-game-end" class="ghost mini hidden" type="button">End game</button>
+                <button id="smash-language-toggle" class="ghost mini hidden" type="button">Prompt: English</button>
               </div>
             </div>
           </div>
@@ -173,6 +174,7 @@
           <button id="begin-study-btn" class="study-game-option secondary hidden" type="button"><span class="study-game-icon" aria-hidden="true">▣</span><span>Study Flashcards</span></button>
           <button id="context-game-start-btn" class="study-game-option secondary hidden" type="button"><span class="study-game-icon" aria-hidden="true">✎</span><span>Write the Context Word</span></button>
           <button id="conjugation-game-start-btn" class="study-game-option secondary hidden" type="button"><span class="study-game-icon" aria-hidden="true">文</span><span>Conjugation Station</span></button>
+          <button id="smash-game-start-btn" class="study-game-option secondary hidden" type="button"><span class="study-game-icon" aria-hidden="true">⚡</span><span>Smash the Match</span></button>
         </div>
 
         <div id="context-game" class="context-game hidden">
@@ -209,6 +211,21 @@
             <button id="conjugation-new-paragraph" class="secondary mini hidden" type="button">New paragraph</button>
             <button id="conjugation-game-submit" class="context-submit-button" type="button" aria-label="Validate answers" title="Fill every blank first" disabled>→</button>
           </div>
+        </div>
+
+        <div id="smash-game" class="smash-game hidden">
+          <p class="game-kicker">Smash the Match</p>
+          <h3 id="smash-prompt"></h3>
+          <div class="smash-meta"><span id="smash-round">Round 1 of 10</span><span id="smash-timer">0.0s</span></div>
+          <div id="smash-grid" class="smash-grid"></div>
+          <p id="smash-feedback" class="status" aria-live="polite"></p>
+        </div>
+
+        <div id="smash-results" class="context-results hidden">
+          <p class="game-kicker">Smash the Match</p>
+          <h3>You finished the game!</h3>
+          <p id="smash-score"></p>
+          <button id="smash-play-again" class="primary" type="button">Play again</button>
         </div>
 
         <div id="flashcard" class="flashcard" aria-live="polite">
