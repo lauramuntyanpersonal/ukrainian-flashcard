@@ -136,6 +136,12 @@ body {
   display: none;
 }
 
+.study-game-option:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+
 .study-game-icon {
   display: inline-flex;
   align-items: center;
